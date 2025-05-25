@@ -1,0 +1,1 @@
+export { ALL_PERMISSIONS, ALL_MODULES } from './permission';
