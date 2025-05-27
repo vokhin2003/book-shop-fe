@@ -1,35 +1,186 @@
-import { Col, Divider, Rate, Row } from "antd";
+import { Col, Divider, message, notification, Rate, Row } from "antd";
 import { MinusOutlined, PlusOutlined } from "@ant-design/icons";
 import { BsCartPlus } from "react-icons/bs";
 import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails"; // Sửa import
 import Counter from "yet-another-react-lightbox/plugins/counter";
-import "yet-another-react-lightbox/plugins/thumbnails.css"; // Thêm CSS
-import { useState } from "react";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/thumbnails.css";
+import "yet-another-react-lightbox/plugins/counter.css";
+import { useEffect, useState } from "react";
 import { IBook } from "@/types/backend";
 import "styles/book.scss";
+import { Navigate } from "react-router-dom";
 
 interface IProps {
     bookData: IBook | null;
 }
 
+type UserAction = "PLUS" | "MINUS";
+
 const BookDetail = (props: IProps) => {
     const { bookData } = props;
     const [isOpenLightbox, setIsOpenLightbox] = useState<boolean>(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
+    const [currentQuantity, setCurrentQuantity] = useState<number>(1);
 
-    // Tạo danh sách ảnh từ thumbnail và slider
-    const images = bookData
-        ? [
-              { src: bookData.thumbnail, width: 800, height: 600 },
-              ...bookData.slider.map((url) => ({
-                  src: url,
-                  width: 800,
-                  height: 600,
-              })),
-          ]
-        : [];
+    const [images, setImages] = useState<
+        { src: string; width: number; height: number }[]
+    >([]);
+
+    useEffect(() => {
+        if (bookData) {
+            const bookImage = bookData
+                ? [
+                      { src: bookData.thumbnail, width: 800, height: 600 },
+                      ...bookData.slider.map((url) => ({
+                          src: url,
+                          width: 800,
+                          height: 600,
+                      })),
+                  ]
+                : [];
+
+            setImages(bookImage);
+        }
+    }, [bookData]);
+
+    const handleChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const inputValue = event.target.value;
+
+        // Cho phép ô trống tạm thời khi đang nhập
+        if (inputValue === "") {
+            setCurrentQuantity(0);
+            return;
+        }
+
+        // Loại bỏ các ký tự không phải số
+        const numericValue = inputValue.replace(/[^0-9]/g, "");
+
+        // Nếu sau khi loại bỏ ký tự không hợp lệ mà còn lại chuỗi rỗng
+        if (numericValue === "") {
+            setCurrentQuantity(0);
+            return;
+        }
+
+        const parsedValue = parseInt(numericValue, 10);
+
+        // Kiểm tra giới hạn tối đa
+        if (bookData?.quantity) {
+            if (parsedValue <= bookData.quantity) {
+                setCurrentQuantity(parsedValue);
+            } else {
+                // Nếu vượt quá giới hạn, set về giá trị tối đa
+                setCurrentQuantity(bookData.quantity);
+            }
+        } else {
+            setCurrentQuantity(parsedValue);
+        }
+    };
+
+    const handleBlurInput = () => {
+        // Khi rời khỏi ô input, kiểm tra và điều chỉnh giá trị
+        if (!currentQuantity || currentQuantity < 1) {
+            setCurrentQuantity(1);
+        } else if (bookData?.quantity && currentQuantity > bookData.quantity) {
+            setCurrentQuantity(bookData.quantity);
+        }
+    };
+
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        // Cho phép: Backspace, Delete, Tab, Escape, Enter, Home, End, Arrow keys
+        const allowedKeys = [
+            "Backspace",
+            "Delete",
+            "Tab",
+            "Escape",
+            "Enter",
+            "Home",
+            "End",
+            "ArrowLeft",
+            "ArrowRight",
+            "ArrowUp",
+            "ArrowDown",
+        ];
+
+        // Cho phép Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+        if (
+            event.ctrlKey &&
+            ["a", "c", "v", "x"].includes(event.key.toLowerCase())
+        ) {
+            return;
+        }
+
+        // Nếu không phải phím được phép và không phải số
+        if (!allowedKeys.includes(event.key) && !/^[0-9]$/.test(event.key)) {
+            event.preventDefault();
+        }
+    };
+
+    const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
+        event.preventDefault();
+        const pastedText = event.clipboardData.getData("text");
+        const numericText = pastedText.replace(/[^0-9]/g, "");
+
+        if (numericText) {
+            const parsedValue = parseInt(numericText, 10);
+            if (bookData?.quantity) {
+                if (parsedValue <= bookData.quantity && parsedValue > 0) {
+                    setCurrentQuantity(parsedValue);
+                } else if (parsedValue > bookData.quantity) {
+                    setCurrentQuantity(bookData.quantity);
+                } else {
+                    setCurrentQuantity(1);
+                }
+            } else {
+                setCurrentQuantity(parsedValue > 0 ? parsedValue : 1);
+            }
+        }
+    };
+
+    const handleChangeButton = (type: UserAction) => {
+        if (type === "MINUS") {
+            if (currentQuantity >= 2) {
+                setCurrentQuantity(currentQuantity - 1);
+            }
+        }
+
+        if (type === "PLUS") {
+            if (bookData?.quantity) {
+                if (currentQuantity < bookData.quantity) {
+                    setCurrentQuantity(currentQuantity + 1);
+                }
+            }
+        }
+    };
+
+    const handleAddToCart = async (quantity, laptop) => {
+        // const res = await addToCartAPI({ quantity, product: laptop.id });
+        // if (res.data) {
+        //     message.success("Sản phẩm đã được thêm vào giỏ hàng");
+        //     // dispatch(doAddToCartAction({ quantity, laptop }));
+        // } else {
+        //     notification.error({
+        //         message: "Đã có lỗi xảy ra",
+        //         description: res.message,
+        //     });
+        // }
+    };
+
+    const handleBuyNow = async (quantity, laptop) => {
+        // console.log(quantity, laptop);
+        // const res = await addToCartAPI({ quantity, product: laptop.id });
+        // if (res.data) {
+        //     // message.success("Sản phẩm đã được thêm vào giỏ hàng");
+        //     // dispatch(doAddToCartAction({ quantity, laptop }));
+        //     Navigate("/order");
+        // } else {
+        //     notification.error({
+        //         message: "Đã có lỗi xảy ra",
+        //         description: res.message,
+        //     });
+        // }
+    };
 
     return (
         <div style={{ background: "#efefef", padding: "20px 0" }}>
@@ -152,88 +303,97 @@ const BookDetail = (props: IProps) => {
                                     </div>
                                 </div>
                             </Col>
+                            <Col span={24}>
+                                <div className="author">
+                                    Tác giả: <a href="#">{bookData?.author}</a>{" "}
+                                </div>
+                                <div className="title">{bookData?.title}</div>
+                                <div className="rating">
+                                    <Rate
+                                        value={5}
+                                        disabled
+                                        style={{
+                                            color: "#ffce3d",
+                                            fontSize: 12,
+                                        }}
+                                    />
+                                    <span className="sold">
+                                        <Divider type="vertical" />
+                                        Đã bán {bookData?.sold ?? 0}
+                                    </span>
+                                </div>
+                                <div className="price">
+                                    <span className="currency">
+                                        {new Intl.NumberFormat("vi-VN", {
+                                            style: "currency",
+                                            currency: "VND",
+                                        }).format(bookData?.price ?? 0)}
+                                    </span>
+                                </div>
+                                <div className="delivery">
+                                    <div>
+                                        <span className="left-side">
+                                            Vận chuyển
+                                        </span>
+                                        <span className="right-side">
+                                            Miễn phí vận chuyển
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="quantity">
+                                    <span className="left-side">Số lượng</span>
+                                    <span className="right-side">
+                                        <button
+                                            onClick={() =>
+                                                handleChangeButton("MINUS")
+                                            }
+                                        >
+                                            <MinusOutlined />
+                                        </button>
+                                        <input
+                                            type="text" // Sử dụng text thay vì number
+                                            value={
+                                                currentQuantity === 0
+                                                    ? ""
+                                                    : currentQuantity.toString()
+                                            }
+                                            onChange={handleChangeInput}
+                                            onBlur={handleBlurInput}
+                                            onKeyDown={handleKeyDown}
+                                            onPaste={handlePaste}
+                                            // placeholder="1"
+                                            style={{ textAlign: "center" }} // Căn giữa text
+                                        />
+
+                                        <button
+                                            onClick={() =>
+                                                handleChangeButton("PLUS")
+                                            }
+                                        >
+                                            <PlusOutlined />
+                                        </button>
+                                    </span>
+                                </div>
+                                <div className="buy">
+                                    <button
+                                        className="cart"
+                                        onClick={() => handleAddToCart()}
+                                    >
+                                        <BsCartPlus className="icon-cart" />
+                                        <span>Thêm vào giỏ hàng</span>
+                                    </button>
+                                    <button
+                                        className="now"
+                                        onClick={() => handleAddToCart(true)}
+                                    >
+                                        Mua ngay
+                                    </button>
+                                </div>
+                            </Col>
                         </Col>
                     </Row>
                 </div>
             </div>
-            {/* Modal Lightbox khi zoom ảnh */}
-            <Lightbox
-            // plugins={[Thumbnails]}
-            // open={isOpenLightbox}
-            // close={() => setIsOpenLightbox(false)}
-            // index={currentIndex}
-            // slides={images}
-            // on={{
-            //     index: (index) => setCurrentIndex(index), // Sửa lỗi TypeScript
-            // }}
-            // render={{
-            //     slide: ({ slide }) => (
-            //         <div
-            //             style={{
-            //                 display: "flex",
-            //                 flexDirection: "column",
-            //                 alignItems: "center",
-            //                 position: "relative",
-            //                 width: "100%",
-            //                 maxWidth: "900px",
-            //                 aspectRatio: "3 / 2", // Tạo giao diện inline trong modal
-            //                 margin: "0 auto",
-            //             }}
-            //         >
-            //             <img
-            //                 src={slide.src}
-            //                 style={{
-            //                     width: "100%",
-            //                     height: "100%",
-            //                     objectFit: "contain",
-            //                 }}
-            //                 alt="Book Image"
-            //             />
-            //             {/* Danh sách ảnh nhỏ tĩnh bên dưới */}
-            //             <div
-            //                 className="thumbnail-container"
-            //                 style={{
-            //                     position: "absolute",
-            //                     bottom: "10px",
-            //                     display: "flex",
-            //                     gap: "10px",
-            //                     maxWidth: "90%",
-            //                     background: "rgba(0, 0, 0, 0.5)",
-            //                     padding: "10px",
-            //                     alignItems: "center",
-            //                 }}
-            //             >
-            //                 {images.map((img, idx) => (
-            //                     <img
-            //                         key={idx}
-            //                         src={img.src}
-            //                         style={{
-            //                             width: "60px",
-            //                             height: "60px",
-            //                             objectFit: "cover",
-            //                             border:
-            //                                 currentIndex === idx
-            //                                     ? "2px solid #1890ff"
-            //                                     : "1px solid #fff",
-            //                             cursor: "pointer",
-            //                         }}
-            //                         onClick={() => setCurrentIndex(idx)}
-            //                     />
-            //                 ))}
-            //             </div>
-            //         </div>
-            //     ),
-            // }}
-            // styles={{
-            //     container: {
-            //         backgroundColor: "rgba(0, 0, 0, 0.9)",
-            //         display: "flex",
-            //         justifyContent: "center",
-            //         alignItems: "center",
-            //     },
-            //     button: { color: "#fff", background: "rgba(0, 0, 0, 0.3)" },
-            // }}
-            />
 
             <Lightbox
                 open={isOpenLightbox}
