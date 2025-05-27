@@ -15,6 +15,12 @@ export interface IModelPaginate<T> {
     result: T[];
 }
 
+export interface IUploadFile {
+    url: string;
+    fileName: string;
+    uploadedAt: string;
+}
+
 export interface IAccount {
     access_token: string;
     user: {
@@ -73,3 +79,51 @@ export interface IRole {
     updatedAt?: string;
     permissions: IPermission[] | [];
 }
+
+export interface ICategory {
+    id: number;
+    name: string;
+    description: string | null;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface IBook {
+    id: number;
+    title: string;
+    thumbnail: string;
+    slider: string[];
+    author: string;
+    price: number;
+    quantity: number;
+    description: string | null;
+    category: ICategory;
+    createdAt?: string;
+    updatedAt?: string;
+    discount: number;
+    sold: number;
+    age: number;
+    publicationDate: string;
+    publisher: string;
+    pageCount: number;
+    coverType: string;
+}
+
+export interface IBookRequest {
+    title: string;
+    thumbnail: string;
+    slider: string[];
+    author: string;
+    price: number;
+    quantity: number;
+    description: string | null;
+    category: number;
+    discount: number;
+    sold: number;
+    age: number;
+    publicationDate: string;
+    publisher: string;
+    pageCount: number;
+    coverType: string;
+}
+

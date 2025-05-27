@@ -1,4 +1,4 @@
-import { IAccount, IBackendRes, IModelPaginate, IPermission, IRole, IUser } from "@/types/backend";
+import { IAccount, IBackendRes, IBook, IBookRequest, ICategory, IModelPaginate, IPermission, IRole, IUploadFile, IUser } from "@/types/backend";
 import axios from "services/axios.customize"
 
 /**
@@ -88,4 +88,68 @@ export const deleteRoleAPI = (id: number) => {
 
 export const fetchRoleAPI = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<IRole>>>(`/api/v1/roles?${query}`);
+}
+
+/**
+ * 
+Module Category
+ */
+
+export const createCategoryAPI = (name: string, description?: string) => {
+    return axios.post<IBackendRes<ICategory>>('/api/v1/categories', { name, description });
+}
+
+export const updateCategoryAPI = (id: number, name: string, description?: string) => {
+    return axios.put<IBackendRes<ICategory>>(`/api/v1/categories/${id}`, { name, description });
+}
+
+export const deleteCategoryAPI = (id: number) => {
+    return axios.delete<IBackendRes<null>>(`/api/v1/categories/${id}`);
+}
+
+export const fetchCategoryAPI = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<ICategory>>>(`/api/v1/categories?${query}`);
+}
+
+
+/**
+ * 
+Module Book
+ */
+
+export const createBookAPI = (book: IBookRequest) => {
+    return axios.post<IBackendRes<IBook>>('/api/v1/books', book);
+}
+
+export const updateBookAPI = (id: number, book: IBookRequest) => {
+    return axios.put<IBackendRes<IBook>>(`/api/v1/books/${id}`, book);
+}
+
+export const fetchBookByIdAPI = (id: number) => {
+    return axios.get<IBackendRes<IBook>>(`/api/v1/books/${id}`);
+}
+
+export const fetchBookAPI = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IBook>>>(`/api/v1/books?${query}`);
+}
+
+
+/**
+ * 
+Module File
+ */
+
+export const uploadFileAPI = (file: any, folder: string) => {
+    const bodyFormData = new FormData();
+    bodyFormData.append('file', file);
+    bodyFormData.append('folder', folder);
+
+    return axios<IBackendRes<IUploadFile>>({
+        method: 'post',
+        url: '/api/v1/files',
+        data: bodyFormData,
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
 }

@@ -1,8 +1,13 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+    createBrowserRouter,
+    Outlet,
+    RouterProvider,
+    useLocation,
+} from "react-router-dom";
 import LoginPage from "pages/auth/login";
 import RegisterPage from "pages/auth/register";
 import { useAppDispatch } from "./redux/hook";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchAccount } from "./redux/slice/accountSlice";
 import LayoutApp from "components/share/layout.app";
 import NotFound from "components/share/notfound";
@@ -12,7 +17,11 @@ import UserPage from "pages/admin/user";
 import ProtectedRoute from "./components/share/protected-route";
 import RolePage from "./pages/admin/role";
 import PermissionPage from "./pages/admin/permission";
-import BookPage from "./pages/admin/book";
+import BookTab from "./pages/admin/book/book.tab";
+import ViewUpsertBook from "./components/admin/book/upsert.book";
+import HomePage from "./pages/client/home";
+import LayoutClient from "./layouts/layout.client";
+import BookPage from "./pages/client/book";
 
 function App() {
     const dispatch = useAppDispatch();
@@ -58,9 +67,16 @@ function App() {
     const router = createBrowserRouter([
         {
             path: "/",
-            element: <LayoutApp>Layout Client</LayoutApp>,
+            element: (
+                <LayoutApp>
+                    <LayoutClient />
+                </LayoutApp>
+            ),
             errorElement: <NotFound />,
-            children: [{ index: true, element: <>Index client</> }],
+            children: [
+                { index: true, element: <HomePage /> },
+                { path: "book/:slug", element: <BookPage /> },
+            ],
         },
         {
             path: "/admin",
@@ -81,11 +97,24 @@ function App() {
                 },
                 {
                     path: "book",
-                    element: (
-                        <ProtectedRoute>
-                            <BookPage />
-                        </ProtectedRoute>
-                    ),
+                    children: [
+                        {
+                            index: true,
+                            element: (
+                                <ProtectedRoute>
+                                    <BookTab />
+                                </ProtectedRoute>
+                            ),
+                        },
+                        {
+                            path: "upsert",
+                            element: (
+                                <ProtectedRoute>
+                                    <ViewUpsertBook />
+                                </ProtectedRoute>
+                            ),
+                        },
+                    ],
                 },
                 {
                     path: "user",

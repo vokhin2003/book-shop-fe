@@ -46,12 +46,14 @@ const UserPage = () => {
     };
 
     useEffect(() => {
+        // console.log(">>> check fetch roles");
         const fetchRoles = async () => {
             try {
                 const res = await fetchRoleAPI("page=1&size=100"); // Giả sử trả về { data: [{ id, name }, ...] }
                 if (res.data) {
                     setRoleList(res.data.result);
                 }
+                // console.log(">>> check fetch role success", res.data);
             } catch (error) {
                 console.error("Failed to fetch roles:", error);
             }
@@ -91,23 +93,37 @@ const UserPage = () => {
             // sorter: true,
             hideInSearch: true,
         },
+        // {
+        //     title: "Role",
+        //     dataIndex: "roleIds",
+        //     // sorter: true,
+        //     valueType: "select",
+        //     fieldProps: {
+        //         mode: "multiple",
+        //         placeholder: "Chọn role",
+        //     },
+        //     request: async () => {
+        //         return roleList.map((role) => ({
+        //             label: role.name,
+        //             value: role.id,
+        //         }));
+        //     },
+        //     render: (_value, entity) => entity.role?.name || "",
+        // },
+
         {
             title: "Role",
-            dataIndex: "roleIds", // Sử dụng dataIndex riêng để gửi role.id
-            // sorter: true,
+            dataIndex: "roleIds",
             valueType: "select",
             fieldProps: {
-                mode: "multiple", // Cho phép chọn nhiều role
+                mode: "multiple",
                 placeholder: "Chọn role",
-            },
-            request: async () => {
-                // Trả về danh sách role cho dropdown
-                return roleList.map((role) => ({
+                options: roleList.map((role) => ({
                     label: role.name,
                     value: role.id,
-                }));
+                })),
             },
-            render: (_value, entity) => entity.role?.name || "", // Hiển thị role.name trong bảng
+            render: (_value, entity) => entity.role?.name || "",
         },
 
         {
@@ -169,9 +185,9 @@ const UserPage = () => {
     ];
 
     const buildQuery = (params: any, sort: any, filter: any) => {
-        console.log(">>> check params", params);
-        console.log(">>> check sort", sort);
-        console.log(">>> check filter", filter);
+        // console.log(">>> check params", params);
+        // console.log(">>> check sort", sort);
+        // console.log(">>> check filter", filter);
 
         const q: any = {
             page: params.current,
