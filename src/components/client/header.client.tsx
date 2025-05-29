@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { logoutAPI } from "@/services/api";
 import { setLogoutAction } from "@/redux/slice/accountSlice";
 import { convertSlug } from "@/utils";
+import { clearCartAction } from "@/redux/slice/cartSlice";
 
 interface IProps {
     searchTerm: string;
@@ -48,6 +49,7 @@ const Header = (props: IProps) => {
         const res = await logoutAPI();
         if (res && res && +res.statusCode === 200) {
             dispatch(setLogoutAction({}));
+            dispatch(clearCartAction());
             message.success("Đăng xuất thành công");
             navigate("/");
         }

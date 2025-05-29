@@ -19,6 +19,7 @@ import type { MenuProps } from "antd";
 import { logoutAPI } from "@/services/api";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { setLogoutAction } from "@/redux/slice/accountSlice";
+import { clearCartAction } from "@/redux/slice/cartSlice";
 
 const { Content, Sider } = Layout;
 
@@ -74,6 +75,7 @@ const LayoutAdmin = () => {
         const res = await logoutAPI();
         if (res && +res.statusCode === 200) {
             dispatch(setLogoutAction({}));
+            dispatch(clearCartAction());
             message.success("Đăng xuất thành công");
             navigate("/");
         }

@@ -102,6 +102,12 @@ export const cartSlice = createSlice({
 
         removeCartItem: (state, action: PayloadAction<number>) => {
             state.items = state.items.filter(item => item.book.id !== action.payload);
+        },
+
+        clearCartAction: (state) => {
+            state.items = [];
+            state.isLoading = false;
+            state.error = "";
         }
 
     },
@@ -182,7 +188,7 @@ export const cartSlice = createSlice({
 });
 
 export const {
-
+    clearCartAction
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

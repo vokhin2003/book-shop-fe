@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { setUserLoginInfo } from "@/redux/slice/accountSlice";
+import { fetchCart } from "@/redux/slice/cartSlice";
 import { loginAPI } from "@/services/api";
 import {
     Button,
@@ -61,6 +62,7 @@ const LoginPage = () => {
             console.log("success");
             localStorage.setItem("access_token", res.data.access_token);
             dispatch(setUserLoginInfo(res.data.user));
+            await dispatch(fetchCart());
             message.success("Đăng nhập tài khoản thành công!");
             // window.location.href = callback ? callback : "/";
             // navigate(callback || "/");
