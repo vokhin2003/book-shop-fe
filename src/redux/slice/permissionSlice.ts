@@ -23,7 +23,7 @@ export const fetchPermission = createAsyncThunk(
 
 
 const initialState: IState = {
-    isFetching: true,
+    isFetching: false,
     meta: {
         current: 1,
         pageSize: 10,

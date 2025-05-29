@@ -33,13 +33,15 @@ const Header = (props: IProps) => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
-    const [carts, setCarts] = useState<any[]>([]);
+    // const [carts, setCarts] = useState<any[]>([]);
 
     const isAuthenticated = useAppSelector(
         (state) => state.account.isAuthenticated
     );
 
     const user = useAppSelector((state) => state.account.user);
+
+    const carts = useAppSelector((state) => state.cart.items);
 
     const handleLogout = async () => {
         const res = await logoutAPI();
@@ -49,104 +51,6 @@ const Header = (props: IProps) => {
             navigate("/");
         }
     };
-
-    // const handleSearch = () => {
-    //     if (filter) {
-    //         if (searchTerm) {
-    //             setFilter(`${filter} and (title~'${searchTerm}')`);
-    //         } else {
-    //             setFilter(filter);
-    //         }
-    //     } else {
-    //         if (searchTerm) {
-    //             setFilter(`(title~'${searchTerm}')`);
-    //         }
-    //     }
-    // };
-
-    // Xử lý searchQuery - loại bỏ khoảng trắng thừa và ký tự đặc biệt
-    // const cleanSearchQuery = searchTerm
-    //     ? searchTerm
-    //           .trim() // Loại bỏ khoảng trắng ở đầu và cuối
-    //           .replace(/\s+/g, " ") // Thay thế nhiều khoảng trắng bằng một khoảng trắng
-    //             .replace(/[^a-zA-Z0-9\s-]/g, "") // Chỉ giữ lại chữ, số, khoảng trắng và dấu '-'
-    //           .trim() // Thêm một lần trim() cuối để loại bỏ khoảng trắng có thể xuất hiện sau khi xóa ký tự đặc biệt
-    //     : "";
-
-    // const cleanSearchQuery = searchTerm
-    //     ? searchTerm
-    //           .trim() // Loại bỏ khoảng trắng ở đầu và cuối
-    //           .replace(/\s+/g, " ") // Thay thế nhiều khoảng trắng bằng một khoảng trắng
-    //           .replace(/[^\p{L}\p{N}\s-.,:']/gu, "") // Giữ thêm dấu chấm, phẩy, hai chấm, nháy đơn
-    //           .trim() // Trim lại
-    //     : "";
-
-    // const handleSearch = () => {
-    //     const cleanSearchQuery = searchTerm
-    //         ? searchTerm
-    //               .trim() // Loại bỏ khoảng trắng ở đầu và cuối
-    //               .replace(/\s+/g, " ") // Thay thế nhiều khoảng trắng bằng một khoảng trắng
-    //               .replace(
-    //                   /[^a-zA-Z0-9\s-.,:áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]/g,
-    //                   ""
-    //               ) // Giữ chữ, số, dấu -.,: và ký tự tiếng Việt
-    //               .trim() // Trim lại
-    //         : "";
-
-    //     setSearchTerm(cleanSearchQuery);
-
-    //     // Nếu sau khi xử lý, chuỗi tìm kiếm rỗng
-    //     if (!cleanSearchQuery) {
-    //         // Nếu filterQuery hiện tại rỗng
-    //         if (!filter) {
-    //             setFilter("");
-    //             return;
-    //         }
-
-    //         // Kiểm tra nếu filterQuery chỉ chứa một điều kiện tìm kiếm
-    //         if (filter.match(/^\(title~'[^']*'\)$/)) {
-    //             setFilter("");
-    //             return;
-    //         }
-
-    //         // Kiểm tra nếu filterQuery có chứa điều kiện tìm kiếm kết hợp với điều kiện khác
-    //         const searchTermRegex = /\s+and\s+\(title~'[^']*'\)$/;
-    //         if (searchTermRegex.test(filter)) {
-    //             // Loại bỏ điều kiện tìm kiếm hiện tại
-    //             setFilter(filter.replace(searchTermRegex, ""));
-    //         }
-    //         // Nếu không có điều kiện tìm kiếm, giữ nguyên filterQuery
-    //         return;
-    //     }
-
-    //     // Xử lý với chuỗi tìm kiếm hợp lệ
-    //     let baseFilterQuery = "";
-
-    //     // Nếu filterQuery hiện tại rỗng
-    //     if (!filter) {
-    //         setFilter(`(title~'${cleanSearchQuery}')`);
-    //         return;
-    //     }
-
-    //     // Kiểm tra nếu filterQuery chỉ chứa một điều kiện tìm kiếm
-    //     if (filter.match(/^\(title~'[^']*'\)$/)) {
-    //         setFilter(`(title~'${cleanSearchQuery}')`);
-    //         return;
-    //     }
-
-    //     // Kiểm tra nếu filterQuery có chứa điều kiện tìm kiếm kết hợp với điều kiện khác
-    //     const searchTermRegex = /\s+and\s+\(title~'[^']*'\)$/;
-    //     if (searchTermRegex.test(filter)) {
-    //         // Loại bỏ điều kiện tìm kiếm hiện tại
-    //         baseFilterQuery = filter.replace(searchTermRegex, "");
-    //     } else {
-    //         // Không có điều kiện tìm kiếm, giữ nguyên filterQuery
-    //         baseFilterQuery = filter;
-    //     }
-
-    //     // Kết hợp baseFilterQuery với điều kiện tìm kiếm mới
-    //     setFilter(`${baseFilterQuery} and (title~'${cleanSearchQuery}')`);
-    // };
 
     const handleSearch = () => {
         const cleanSearchQuery = searchTerm
@@ -258,20 +162,16 @@ const Header = (props: IProps) => {
         return (
             <div className="pop-cart-body">
                 <div className="pop-cart-content">
-                    {carts?.map((book, index) => {
+                    {carts?.map((item, index) => {
                         return (
                             <div className="book" key={`book-${index}`}>
-                                <img
-                                    src={`${
-                                        import.meta.env.VITE_BACKEND_URL
-                                    }/images/book/${book?.detail?.thumbnail}`}
-                                />
-                                <div>{book?.detail?.mainText}</div>
+                                <img src={item.book.thumbnail} />
+                                <div>{item.book.title}</div>
                                 <div className="price">
                                     {new Intl.NumberFormat("vi-VN", {
                                         style: "currency",
                                         currency: "VND",
-                                    }).format(book?.detail?.price ?? 0)}
+                                    }).format(item.book.price ?? 0)}
                                 </div>
                             </div>
                         );

@@ -22,6 +22,8 @@ import ViewUpsertBook from "./components/admin/book/upsert.book";
 import HomePage from "./pages/client/home";
 import LayoutClient from "./layouts/layout.client";
 import BookPage from "./pages/client/book";
+import { fetchCart } from "./redux/slice/cartSlice";
+import OrderPage from "./pages/client/order";
 
 function App() {
     const dispatch = useAppDispatch();
@@ -62,6 +64,7 @@ function App() {
         // }
 
         dispatch(fetchAccount());
+        dispatch(fetchCart());
     }, [dispatch]);
 
     const router = createBrowserRouter([
@@ -76,6 +79,14 @@ function App() {
             children: [
                 { index: true, element: <HomePage /> },
                 { path: "book/:slug", element: <BookPage /> },
+                {
+                    path: "/order",
+                    element: (
+                        <ProtectedRoute>
+                            <OrderPage />
+                        </ProtectedRoute>
+                    ),
+                },
             ],
         },
         {

@@ -10,7 +10,9 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import { useEffect, useState } from "react";
 import { IBook } from "@/types/backend";
 import "styles/book.scss";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "@/redux/hook";
+import { addToCart } from "@/redux/slice/cartSlice";
 
 interface IProps {
     bookData: IBook | null;
@@ -27,6 +29,9 @@ const BookDetail = (props: IProps) => {
     const [images, setImages] = useState<
         { src: string; width: number; height: number }[]
     >([]);
+
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (bookData) {
@@ -154,32 +159,43 @@ const BookDetail = (props: IProps) => {
         }
     };
 
-    const handleAddToCart = async (quantity, laptop) => {
-        // const res = await addToCartAPI({ quantity, product: laptop.id });
-        // if (res.data) {
-        //     message.success("Sản phẩm đã được thêm vào giỏ hàng");
-        //     // dispatch(doAddToCartAction({ quantity, laptop }));
-        // } else {
-        //     notification.error({
-        //         message: "Đã có lỗi xảy ra",
-        //         description: res.message,
-        //     });
-        // }
+    const handleAddToCart = async (quantity: number, book: IBook) => {
+        try {
+            await dispatch(addToCart({ bookId: book.id, quantity })).unwrap();
+            message.success("Sản phẩm đã được thêm vào giỏ hàng");
+        } catch (error) {
+            console.log(">>> check error when add to cart:", error);
+            notification.error({
+                message: "Đã có lỗi xảy ra",
+                description: error as string,
+            });
+        }
     };
 
-    const handleBuyNow = async (quantity, laptop) => {
-        // console.log(quantity, laptop);
+    const handleBuyNow = async (quantity: number, book: IBook) => {
         // const res = await addToCartAPI({ quantity, product: laptop.id });
         // if (res.data) {
         //     // message.success("Sản phẩm đã được thêm vào giỏ hàng");
         //     // dispatch(doAddToCartAction({ quantity, laptop }));
-        //     Navigate("/order");
+        //     navigate("/order");
         // } else {
         //     notification.error({
         //         message: "Đã có lỗi xảy ra",
         //         description: res.message,
         //     });
         // }
+
+        try {
+            await dispatch(addToCart({ bookId: book.id, quantity })).unwrap();
+            // message.success("Sản phẩm đã được thêm vào giỏ hàng");
+            navigate("/order");
+        } catch (error) {
+            // console.log(">>> check error when add to cart:", error);
+            notification.error({
+                message: "Đã có lỗi xảy ra",
+                description: error as string,
+            });
+        }
     };
 
     return (
@@ -377,14 +393,24 @@ const BookDetail = (props: IProps) => {
                                 <div className="buy">
                                     <button
                                         className="cart"
-                                        onClick={() => handleAddToCart()}
+                                        onClick={() =>
+                                            handleAddToCart(
+                                                currentQuantity,
+                                                bookData!
+                                            )
+                                        }
                                     >
                                         <BsCartPlus className="icon-cart" />
                                         <span>Thêm vào giỏ hàng</span>
                                     </button>
                                     <button
                                         className="now"
-                                        onClick={() => handleAddToCart(true)}
+                                        onClick={() =>
+                                            handleBuyNow(
+                                                currentQuantity,
+                                                bookData!
+                                            )
+                                        }
                                     >
                                         Mua ngay
                                     </button>
