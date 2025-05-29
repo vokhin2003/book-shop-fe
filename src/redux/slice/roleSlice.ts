@@ -33,7 +33,7 @@ export const fetchRole = createAsyncThunk(
 
 
 const initialState: IState = {
-    isFetching: true,
+    isFetching: false,
     // isFetchSingle: true,
     meta: {
         current: 1,

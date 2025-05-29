@@ -18,7 +18,7 @@ export const fetchAccount = createAsyncThunk(
     async (_, { rejectWithValue, dispatch }) => {
         try {
             const response = await getAccountAPI();
-            // console.log('API response:', response);
+            console.log('API response:', response);
             return response.data; // { user: { ... } }
         } catch (error) {
             console.error('Fetch account error:', error);

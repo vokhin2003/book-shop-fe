@@ -127,3 +127,10 @@ export interface IBookRequest {
     coverType: string;
 }
 
+export interface ICartItem {
+    id: number;
+    quantity: number;
+    createdAt?: string;
+    updatedAt?: string;
+    book: IBook;
+}

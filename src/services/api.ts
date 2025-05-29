@@ -1,4 +1,4 @@
-import { IAccount, IBackendRes, IBook, IBookRequest, ICategory, IModelPaginate, IPermission, IRole, IUploadFile, IUser } from "@/types/backend";
+import { IAccount, IBackendRes, IBook, IBookRequest, ICartItem, ICategory, IModelPaginate, IPermission, IRole, IUploadFile, IUser } from "@/types/backend";
 import axios from "services/axios.customize"
 
 /**
@@ -152,4 +152,29 @@ export const uploadFileAPI = (file: any, folder: string) => {
             "Content-Type": "multipart/form-data",
         },
     });
+}
+
+/**
+ * 
+Module Cart
+ */
+
+export const addToCartAPI = (bookId: number, quantity: number) => {
+    return axios.post<IBackendRes<ICartItem>>('/api/v1/carts', { bookId, quantity })
+}
+
+export const updateCartAPI = (bookId: number, quantity: number) => {
+    return axios.put<IBackendRes<ICartItem>>('/api/v1/carts', { bookId, quantity });
+}
+
+export const removeFromCartAPI = (bookId: number) => {
+    return axios.delete<IBackendRes<null>>(`/api/v1/carts/${bookId}`);
+}
+
+export const clearCartAPI = () => {
+    return axios.delete<IBackendRes<null>>('/api/v1/carts/clear');
+}
+
+export const fetchCartAPI = () => {
+    return axios.get<IBackendRes<ICartItem[]>>('/api/v1/carts');
 }
