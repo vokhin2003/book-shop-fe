@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { Link } from "react-router-dom";
 import { logoutAPI } from "@/services/api";
 import { setLogoutAction } from "@/redux/slice/accountSlice";
+import { convertSlug } from "@/utils";
 
 interface IProps {
     searchTerm: string;
@@ -159,15 +160,40 @@ const Header = (props: IProps) => {
     }`;
 
     const contentPopover = () => {
+        // Chỉ hiển thị tối đa 4 sản phẩm
+        const displayCarts = carts?.slice(0, 4) || [];
+        const hasMoreItems = carts?.length > 4;
+
+        const handleItemClick = (book: any) => {
+            const slug = convertSlug(book.title);
+            navigate(`/book/${slug}?id=${book.id}`);
+        };
+
         return (
             <div className="pop-cart-body">
+                <div className="pop-cart-header">
+                    <span className="cart-title">Sản Phẩm Mới Thêm</span>
+                </div>
                 <div className="pop-cart-content">
-                    {carts?.map((item, index) => {
+                    {displayCarts?.map((item, index) => {
                         return (
-                            <div className="book" key={`book-${index}`}>
-                                <img src={item.book.thumbnail} />
-                                <div>{item.book.title}</div>
-                                <div className="price">
+                            <div
+                                className="cart-item"
+                                key={`book-${index}`}
+                                onClick={() => handleItemClick(item.book)}
+                            >
+                                <div className="item-image">
+                                    <img
+                                        src={item.book.thumbnail}
+                                        alt={item.book.title}
+                                    />
+                                </div>
+                                <div className="item-info">
+                                    <div className="item-title">
+                                        {item.book.title}
+                                    </div>
+                                </div>
+                                <div className="item-price">
                                     {new Intl.NumberFormat("vi-VN", {
                                         style: "currency",
                                         currency: "VND",
@@ -176,10 +202,21 @@ const Header = (props: IProps) => {
                             </div>
                         );
                     })}
+                    {hasMoreItems && (
+                        <div className="more-items">
+                            <span>Và {carts.length - 4} sản phẩm khác...</span>
+                        </div>
+                    )}
                 </div>
                 {carts.length > 0 ? (
                     <div className="pop-cart-footer">
-                        <button onClick={() => navigate("/order")}>
+                        <div className="cart-summary">
+                            <span>{carts.length} Thêm Hàng Vào Giỏ</span>
+                        </div>
+                        <button
+                            className="view-cart-btn"
+                            onClick={() => navigate("/order")}
+                        >
                             Xem giỏ hàng
                         </button>
                     </div>
@@ -237,9 +274,10 @@ const Header = (props: IProps) => {
                                             className="popover-carts"
                                             placement="topRight"
                                             rootClassName={"popover-carts"}
-                                            title={"Sản phẩm mới thêm"}
+                                            title={null}
                                             content={contentPopover}
                                             arrow={true}
+                                            overlayClassName="cart-popover-overlay"
                                         >
                                             <Badge
                                                 count={carts?.length ?? 0}
