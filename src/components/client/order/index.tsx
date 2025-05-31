@@ -223,21 +223,21 @@ const OrderDetail = (props: IProps) => {
                         </span>
                     </div>
                     <Divider style={{ margin: "10px 0" }} />
-                    {/* <button
-                        // disabled={carts.length === 0}
+                    <button
+                        disabled={carts.length === 0}
                         // onClick={() => setCurrentStep(1)}
                         onClick={() => handleNextStep()}
                     >
                         Mua Hàng ({carts?.length ?? 0})
-                    </button> */}
-                    <Button
+                    </button>
+                    {/* <Button
                         color="danger"
                         variant="solid"
                         onClick={() => handleNextStep()}
                         // loading={true}
                     >
                         Mua Hàng ({carts?.length ?? 0})
-                    </Button>
+                    </Button> */}
                 </div>
             </Col>
         </Row>

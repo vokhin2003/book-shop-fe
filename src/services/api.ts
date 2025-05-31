@@ -1,4 +1,4 @@
-import { IAccount, IBackendRes, IBook, IBookRequest, ICartItem, ICategory, IModelPaginate, IPermission, IRole, IUploadFile, IUser } from "@/types/backend";
+import { IAccount, IBackendRes, IBook, IBookRequest, ICartItem, ICategory, ICreateOrderRequest, IModelPaginate, IOrder, IPaymentResponse, IPaymentResult, IPermission, IRole, IUploadFile, IUser } from "@/types/backend";
 import axios from "services/axios.customize"
 
 /**
@@ -177,4 +177,29 @@ export const clearCartAPI = () => {
 
 export const fetchCartAPI = () => {
     return axios.get<IBackendRes<ICartItem[]>>('/api/v1/carts');
+}
+
+/**
+ * 
+Module Order
+ */
+
+export const placeOrderAPI = (order: ICreateOrderRequest) => {
+    return axios.post<IBackendRes<IOrder>>('/api/v1/orders', order);
+}
+
+export const getTransactionStatusAPI = (transactionId: string) => {
+    return axios.get<IBackendRes<IPaymentResult>>(`/api/v1/transactions/${transactionId}`);
+};
+
+export const createPaymentUrlAPI = (paymentData: { orderId: number; amount: number; paymentMethod: string }) => {
+    return axios.post<IBackendRes<IPaymentResponse>>(`/api/v1/payments`, paymentData);
+};
+
+export const historyOrderAPI = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IOrder>>>(`/api/v1/orders/history?${query}`);
+}
+
+export const getOrderDetailAPI = (orderId: number) => {
+    return axios.get<IBackendRes<IOrder>>(`/api/v1/orders/${orderId}`);
 }

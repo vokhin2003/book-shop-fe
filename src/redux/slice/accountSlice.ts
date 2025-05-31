@@ -43,6 +43,7 @@ interface IState {
         email: string;
         fullName: string;
         phone: string;
+        address: string;
         avatar: string;
         role: string;
         permissions?: {
@@ -66,6 +67,7 @@ const initialState: IState = {
         email: "",
         fullName: "",
         phone: "",
+        address: "",
         avatar: "",
         role: "",
         permissions: [],
@@ -93,6 +95,7 @@ export const accountSlice = createSlice({
                 email: "",
                 fullName: "",
                 phone: "",
+                address: "",
                 avatar: "",
                 role: "",
                 permissions: [],
@@ -106,6 +109,7 @@ export const accountSlice = createSlice({
             state.user.email = action.payload.email;
             state.user.fullName = action.payload.fullName;
             state.user.phone = action.payload.phone;
+            state.user.address = action.payload.address ?? "";
             state.user.avatar = action.payload.avatar;
             state.user.role = action?.payload?.role;
             if (!action?.payload?.role) state.user.role = "";
@@ -131,6 +135,7 @@ export const accountSlice = createSlice({
                 state.user.email = action.payload.user.email;
                 state.user.fullName = action.payload.user.fullName;
                 state.user.phone = action.payload.user.phone;
+                state.user.address = action.payload.user.address || "";
                 state.user.avatar = action.payload.user.avatar;
                 state.user.role = action.payload.user.role || "";
                 state.user.permissions = action.payload.user.permissions || [];

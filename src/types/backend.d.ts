@@ -28,6 +28,7 @@ export interface IAccount {
         email: string;
         fullName: string;
         phone: string;
+        address: string;
         avatar: string;
         role: string;
         permissions: {
@@ -133,4 +134,51 @@ export interface ICartItem {
     createdAt?: string;
     updatedAt?: string;
     book: IBook;
+}
+
+export interface ICreateOrderRequest {
+    fullName: string;
+    phone: string;
+    shippingAddress: string;
+    paymentMethod: string;
+    items: {
+        bookId: number;
+        quantity: number;
+    }[];
+    userId?: number;
+}
+
+export interface IOrderItem {
+    id: number;
+    quantity: number;
+    price: number;
+    book: IBook;
+}
+
+export interface IOrder {
+    id: number;
+    fullName: string;
+    phone: string;
+    totalAmount: number;
+    shippingAddress: string;
+    paymentMethod: string;
+    status: string;
+    userId: number;
+    orderItems: IOrderItem[];
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface IPaymentResult {
+    transactionId: string;
+    status: string;
+    message: string;
+}
+
+export interface IPaymentResponse {
+    paymentUrl?: string;
+    transactionId: string;
+    paymentMethod: string;
+    status: string;
+    message: string;
 }

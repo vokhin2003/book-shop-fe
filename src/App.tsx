@@ -24,6 +24,9 @@ import LayoutClient from "./layouts/layout.client";
 import BookPage from "./pages/client/book";
 import { fetchCart } from "./redux/slice/cartSlice";
 import OrderPage from "./pages/client/order";
+import PaymentReturn from "./components/client/order/PaymentReturn";
+import HistoryPage from "./pages/client/history";
+import OrderDetailPage from "./pages/client/order.detail";
 
 function App() {
     const dispatch = useAppDispatch();
@@ -68,6 +71,10 @@ function App() {
     }, [dispatch]);
 
     const router = createBrowserRouter([
+        // {
+        //     path: "/payment/return",
+        //     element: <PaymentReturn />,
+        // },
         {
             path: "/",
             element: (
@@ -84,6 +91,26 @@ function App() {
                     element: (
                         <ProtectedRoute>
                             <OrderPage />
+                        </ProtectedRoute>
+                    ),
+                },
+                {
+                    path: "payment/return",
+                    element: <PaymentReturn />,
+                },
+                {
+                    path: "history",
+                    element: (
+                        <ProtectedRoute>
+                            <HistoryPage />
+                        </ProtectedRoute>
+                    ),
+                },
+                {
+                    path: "/order/detail/:orderId",
+                    element: (
+                        <ProtectedRoute>
+                            <OrderDetailPage />
                         </ProtectedRoute>
                     ),
                 },

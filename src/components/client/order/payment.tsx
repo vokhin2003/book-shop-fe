@@ -1,4 +1,7 @@
-import { useAppSelector } from "@/redux/hook";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
+import { clearCart } from "@/redux/slice/cartSlice";
+import { createPaymentUrlAPI, placeOrderAPI } from "@/services/api";
+import { ICreateOrderRequest } from "@/types/backend";
 import { DeleteTwoTone, LoadingOutlined } from "@ant-design/icons";
 import {
     App,
@@ -11,17 +14,19 @@ import {
     Radio,
     Row,
     Space,
+    message,
+    notification,
 } from "antd";
 import { useEffect, useState } from "react";
 import { isMobile } from "react-device-detect";
 
-type UserMethod = "COD" | "BANKING";
+type UserMethod = "COD" | "VNPAY";
 
 type FieldType = {
-    address: string;
+    shippingAddress: string;
     fullName: string;
     phone: string;
-    method: UserMethod;
+    paymentMethod: UserMethod;
 };
 
 const { TextArea } = Input;
@@ -32,11 +37,12 @@ interface IProps {
 
 const Payment = (props: IProps) => {
     const { setCurrentStep } = props;
-    const { message, notification } = App.useApp();
     // const { carts, user, setCarts } = useCurrentApp();
 
     const carts = useAppSelector((state) => state.cart.items);
     const user = useAppSelector((state) => state.account.user);
+
+    const dispatch = useAppDispatch();
 
     const [form] = Form.useForm();
 
@@ -63,7 +69,8 @@ const Payment = (props: IProps) => {
             form.setFieldsValue({
                 fullName: user.fullName,
                 phone: user.phone,
-                method: "COD",
+                paymentMethod: "COD",
+                shippingAddress: user.address,
             });
         }
     }, [user]);
@@ -78,35 +85,106 @@ const Payment = (props: IProps) => {
         // }
     };
 
+    // const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    //     console.log(">>> values:", values);
+    //     // const { address, fullName, method, phone } = values;
+    //     // const detail = carts.map((item) => ({
+    //     //     bookName: item.detail.mainText,
+    //     //     quantity: item.quantity,
+    //     //     _id: item._id,
+    //     // }));
+    //     const items = carts.map((item) => ({
+    //         bookId: item.book.id,
+    //         quantity: item.quantity,
+    //     }));
+
+    //     const submitData: ICreateOrderRequest = {
+    //         fullName: values.fullName,
+    //         phone: values.phone,
+    //         shippingAddress: values.shippingAddress,
+    //         paymentMethod: values.paymentMethod,
+    //         items: items,
+    //     };
+    //     setIsSubmit(true);
+    //     const res = await placeOrderAPI(submitData);
+    //     if (res.data) {
+    //         // localStorage.removeItem("carts");
+    //         // setCarts([]);
+    //         dispatch(clearCart());
+    //         message.success("Đặt hàng thành công!");
+    //         setCurrentStep(2);
+    //     } else {
+    //         notification.error({
+    //             message: "Đã có lỗi xảy ra",
+    //             description: res.message,
+    //         });
+    //     }
+    //     setIsSubmit(false);
+    // };
+
     const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-        // console.log(">>> values:", values);
-        // const { address, fullName, method, phone } = values;
-        // const detail = carts.map((item) => ({
-        //     bookName: item.detail.mainText,
-        //     quantity: item.quantity,
-        //     _id: item._id,
-        // }));
-        // setIsSubmit(true);
-        // const res = await createOrderAPI(
-        //     fullName,
-        //     address,
-        //     phone,
-        //     totalPrice,
-        //     method,
-        //     detail
-        // );
-        // if (res.data) {
-        //     localStorage.removeItem("carts");
-        //     setCarts([]);
-        //     message.success("Đặt hàng thành công!");
-        //     setCurrentStep(2);
-        // } else {
-        //     notification.error({
-        //         message: "Đã có lỗi xảy ra",
-        //         description: res.message,
-        //     });
-        // }
-        // setIsSubmit(false);
+        console.log(">>> values:", values);
+        const items = carts.map((item) => ({
+            bookId: item.book.id,
+            quantity: item.quantity,
+        }));
+
+        const submitData: ICreateOrderRequest = {
+            fullName: values.fullName,
+            phone: values.phone,
+            shippingAddress: values.shippingAddress,
+            paymentMethod: values.paymentMethod,
+            items: items,
+        };
+
+        setIsSubmit(true);
+        try {
+            // Gọi API tạo đơn hàng
+            const orderRes = await placeOrderAPI(submitData);
+            if (!orderRes.data) {
+                throw new Error(orderRes.message || "Failed to place order");
+            }
+
+            const order = orderRes.data;
+            if (values.paymentMethod === "COD") {
+                // Với COD, chuyển sang bước hoàn tất
+                dispatch(clearCart());
+                message.success("Đặt hàng thành công!");
+                setCurrentStep(2);
+            } else if (values.paymentMethod === "VNPAY") {
+                // Với VNPay, gọi API lấy paymentUrl
+                const paymentData = {
+                    orderId: order.id,
+                    amount: Number(order.totalAmount.toFixed(2)), // Đảm bảo 99000.00
+                    paymentMethod: "VNPAY",
+                };
+                const paymentRes = await createPaymentUrlAPI(paymentData);
+                if (!paymentRes.data) {
+                    throw new Error(
+                        paymentRes.message || "Failed to create payment URL"
+                    );
+                }
+
+                const { paymentUrl, transactionId } = paymentRes.data;
+                if (paymentUrl) {
+                    // Lưu transactionId để kiểm tra sau
+                    localStorage.setItem("pendingTransactionId", transactionId);
+                    // Chuyển hướng đến trang thanh toán VNPay
+                    window.location.href = paymentUrl;
+                } else {
+                    throw new Error("Payment URL not found");
+                }
+            } else {
+                throw new Error("Unsupported payment method");
+            }
+        } catch (error: any) {
+            notification.error({
+                message: "Đã có lỗi xảy ra",
+                description: error.message || "Unknown error",
+            });
+        } finally {
+            setIsSubmit(false);
+        }
     };
 
     return (
@@ -214,15 +292,15 @@ const Payment = (props: IProps) => {
                         <div className="order-sum">
                             <Form.Item<FieldType>
                                 label="Hình thức thanh toán"
-                                name="method"
+                                name="paymentMethod"
                             >
                                 <Radio.Group>
                                     <Space direction="vertical">
                                         <Radio value={"COD"}>
                                             Thanh toán khi nhận hàng
                                         </Radio>
-                                        <Radio value={"BANKING"}>
-                                            Chuyển khoản ngân hàng
+                                        <Radio value={"VNPAY"}>
+                                            Thanh toán qua VNPAY
                                         </Radio>
                                     </Space>
                                 </Radio.Group>
@@ -255,7 +333,7 @@ const Payment = (props: IProps) => {
                             </Form.Item>
                             <Form.Item<FieldType>
                                 label="Địa chỉ nhận hàng"
-                                name="address"
+                                name="shippingAddress"
                                 rules={[
                                     {
                                         required: true,
@@ -285,7 +363,7 @@ const Payment = (props: IProps) => {
                                 </span>
                             </div>
                             <Divider style={{ margin: "10px 0" }} />
-                            {/* <button
+                            <button
                                 onClick={() => form.submit()}
                                 disabled={isSubmit}
                             >
@@ -295,16 +373,16 @@ const Payment = (props: IProps) => {
                                     </span>
                                 )}
                                 Đặt Hàng ({carts?.length ?? 0})
-                            </button> */}
+                            </button>
 
-                            <Button
+                            {/* <Button
                                 color="danger"
                                 variant="solid"
                                 onClick={() => form.submit()}
                                 loading={isSubmit}
                             >
                                 Đặt hàng ({carts?.length ?? 0})
-                            </Button>
+                            </Button> */}
                         </div>
                     </Form>
                 </div>

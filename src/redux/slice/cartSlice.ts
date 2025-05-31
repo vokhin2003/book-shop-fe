@@ -1,5 +1,5 @@
 
-import { addToCartAPI, fetchCartAPI, removeFromCartAPI, updateCartAPI } from '@/services/api';
+import { addToCartAPI, clearCartAPI, fetchCartAPI, removeFromCartAPI, updateCartAPI } from '@/services/api';
 import { ICartItem } from '@/types/backend';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { act } from 'react';
@@ -62,6 +62,21 @@ export const removeFromCart = createAsyncThunk(
                 return bookId;
             }
             return rejectWithValue(res.message || 'Không thể xóa sản phẩm khỏi giỏ hàng');
+        } catch (error) {
+            return rejectWithValue(error.message || 'Lỗi không xác định');
+        }
+    }
+)
+
+export const clearCart = createAsyncThunk(
+    'cart/clearCart',
+    async (_, { rejectWithValue }) => {
+        try {
+            const res = await clearCartAPI();
+            if (res.statusCode === 200) {
+                return [];
+            }
+            return rejectWithValue(res.message || 'Không thể xóa giỏ hàng');
         } catch (error) {
             return rejectWithValue(error.message || 'Lỗi không xác định');
         }
@@ -181,6 +196,19 @@ export const cartSlice = createSlice({
                     type: 'cart/removeCartItem',
                     payload: action.payload as number
                 })
+            });
+
+        builder
+            .addCase(clearCart.pending, (state) => {
+                state.isLoading = true;
+                state.error = "";
+            })
+            .addCase(clearCart.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload as string || 'Đã có lỗi xảy ra khi xóa giỏ hàng';
+            })
+            .addCase(clearCart.fulfilled, (state) => {
+                cartSlice.caseReducers.clearCartAction(state);
             });
 
     },

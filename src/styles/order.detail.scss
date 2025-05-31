@@ -1,0 +1,476 @@
+// Color variables
+$primary-color: #1890ff; // Màu xanh dương chủ đạo
+$secondary-color: #fe3834; // Màu cam
+$success-color: #52c41a;
+$error-color: #ff4d4f;
+$warning-color: #faad14;
+$text-primary: #262626;
+$text-secondary: #595959;
+$text-disabled: #8c8c8c;
+$border-color: #e8e8e8;
+$background-light: #f5f5f5;
+$background-white: white;
+$shadow-light: rgba(0, 0, 0, 0.08);
+$shadow-hover: rgba(0, 0, 0, 0.15);
+
+.order-detail-page {
+    background-color: $background-light;
+    min-height: 100vh;
+    padding: 20px 0;
+}
+
+.order-detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+// Loading and Error States
+.order-detail-loading,
+.order-detail-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 20px;
+
+    p {
+        font-size: 16px;
+        color: $text-secondary;
+        margin: 0;
+    }
+}
+
+// Header
+.order-detail-header {
+    background: $background-white;
+    padding: 20px 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px $shadow-light;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .back-button {
+        color: $primary-color;
+        font-size: 14px;
+        padding: 4px 8px;
+
+        &:hover,
+        &:focus {
+            color: darken($primary-color, 10%);
+            background-color: rgba($primary-color, 0.1);
+        }
+    }
+
+    .header-info {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        h2 {
+            margin: 0;
+            color: $text-primary;
+            font-size: 20px;
+            font-weight: 600;
+        }
+    }
+}
+
+// Cards
+.status-card,
+.info-card,
+.items-card,
+.summary-card,
+.actions-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px $shadow-light;
+    margin-bottom: 24px;
+
+    .ant-card-head {
+        border-bottom: 1px solid $border-color;
+
+        .ant-card-head-title {
+            color: $text-primary;
+            font-weight: 600;
+            font-size: 16px;
+        }
+    }
+
+    .ant-card-body {
+        padding: 24px;
+    }
+}
+
+// Status Card
+.status-card {
+    .ant-steps {
+        .ant-steps-item {
+            &-active {
+                // .ant-steps-item-icon {
+                //     background-color: $primary-color;
+                //     border-color: $primary-color;
+                // }
+
+                .ant-steps-item-title {
+                    color: $primary-color;
+                    font-weight: 600;
+                }
+            }
+
+            // &-finish {
+            //     .ant-steps-item-icon {
+            //         background-color: $success-color;
+            //         border-color: $success-color;
+            //     }
+
+            //     .ant-steps-item-title {
+            //         color: $success-color;
+            //     }
+            // }
+        }
+    }
+
+    .cancelled-status {
+        text-align: center;
+        padding: 40px 0;
+    }
+}
+
+// Info Card
+.info-card {
+    .ant-descriptions {
+        .ant-descriptions-item-label {
+            font-weight: 600;
+            color: $text-primary;
+            background-color: #fafafa;
+        }
+
+        .ant-descriptions-item-content {
+            color: $text-secondary;
+        }
+    }
+}
+
+// Items Card
+.items-card {
+    .order-items {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .order-item {
+        cursor: pointer;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+        border: 1px solid $border-color;
+        border-radius: 8px;
+        background-color: #fafafa;
+        transition: box-shadow 0.3s ease;
+
+        &:hover {
+            box-shadow: 0 2px 8px $shadow-light;
+        }
+
+        .item-details {
+            flex: 1;
+            min-width: 0;
+
+            .item-title {
+                font-size: 16px;
+                font-weight: 600;
+                color: $text-primary;
+                margin: 0 0 8px 0;
+                line-height: 1.4;
+            }
+
+            .item-author,
+            .item-category {
+                font-size: 14px;
+                color: $text-disabled;
+                margin: 4px 0;
+            }
+
+            .item-quantity {
+                font-size: 14px;
+                color: $text-secondary;
+                margin-top: 8px;
+
+                strong {
+                    color: $text-primary;
+                }
+            }
+        }
+
+        .item-price {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            min-width: 120px;
+            gap: 4px;
+
+            .original-price {
+                font-size: 12px;
+                color: $text-disabled;
+                text-decoration: line-through;
+            }
+
+            .current-price {
+                font-size: 14px;
+                font-weight: 600;
+                color: $secondary-color;
+            }
+
+            .total-price {
+                font-size: 16px;
+                font-weight: 700;
+                color: $text-primary;
+                margin-top: 8px;
+            }
+        }
+    }
+}
+
+// Summary Card
+.summary-card {
+    .summary-content {
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            font-size: 14px;
+            color: $text-secondary;
+
+            &.total-row {
+                font-size: 16px;
+                font-weight: 600;
+                color: $text-primary;
+                margin-top: 8px;
+
+                .total-amount {
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: $secondary-color;
+                }
+            }
+        }
+    }
+}
+
+// Actions Card
+.actions-card {
+    .ant-btn {
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+
+        // &-primary {
+        //     background-color: $secondary-color;
+        //     border-color: $secondary-color;
+
+        //     &:hover,
+        //     &:focus {
+        //         background-color: darken($secondary-color, 10%);
+        //         border-color: darken($secondary-color, 10%);
+        //     }
+
+        //     &:active {
+        //         background-color: darken($secondary-color, 15%);
+        //         border-color: darken($secondary-color, 15%);
+        //     }
+        // }
+
+        &-primary {
+            background-color: $secondary-color !important; // #fe3834
+            border-color: $secondary-color !important;
+            color: white !important;
+
+            &:hover,
+            &:focus {
+                background-color: darken($secondary-color, 10%) !important;
+                border-color: darken($secondary-color, 10%) !important;
+                color: white !important;
+            }
+
+            &:active {
+                background-color: darken($secondary-color, 15%) !important;
+                border-color: darken($secondary-color, 15%) !important;
+                color: white !important;
+            }
+
+            // Ensure no default Ant Design styles interfere
+            &.ant-btn-clicked::after {
+                border: none !important;
+            }
+        }
+
+        &-default {
+            color: $primary-color;
+            border-color: $primary-color;
+
+            &:hover,
+            &:focus {
+                color: darken($primary-color, 10%);
+                border-color: darken($primary-color, 10%);
+                background-color: rgba($primary-color, 0.05);
+            }
+
+            &:active {
+                color: darken($primary-color, 15%);
+                border-color: darken($primary-color, 15%);
+            }
+        }
+
+        &-dangerous {
+            &:hover,
+            &:focus {
+                background-color: rgba($error-color, 0.05);
+            }
+        }
+    }
+}
+
+// Responsive Design
+@media (max-width: 992px) {
+    .order-detail-container {
+        padding: 0 16px;
+    }
+
+    .order-detail-header {
+        padding: 16px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+
+        .header-info {
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+
+            h2 {
+                font-size: 18px;
+            }
+        }
+    }
+
+    .items-card {
+        .order-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 12px;
+
+            .item-details {
+                text-align: left;
+            }
+
+            .item-price {
+                align-items: center;
+                width: 100%;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .order-detail-page {
+        padding: 10px 0;
+    }
+
+    .order-detail-container {
+        padding: 0 12px;
+    }
+
+    .status-card,
+    .info-card,
+    .items-card,
+    .summary-card,
+    .actions-card {
+        margin-bottom: 16px;
+
+        .ant-card-body {
+            padding: 16px;
+        }
+    }
+
+    .order-detail-header {
+        padding: 12px 16px;
+        margin-bottom: 16px;
+
+        .header-info h2 {
+            font-size: 16px;
+        }
+    }
+
+    .items-card {
+        .order-item {
+            padding: 16px;
+
+            .item-details {
+                .item-title {
+                    font-size: 14px;
+                }
+
+                .item-author,
+                .item-category,
+                .item-quantity {
+                    font-size: 12px;
+                }
+            }
+        }
+    }
+
+    .ant-descriptions {
+        .ant-descriptions-item-label,
+        .ant-descriptions-item-content {
+            font-size: 13px;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .order-detail-header {
+        .back-button {
+            font-size: 12px;
+        }
+    }
+
+    .status-card {
+        .ant-steps {
+            .ant-steps-item {
+                .ant-steps-item-title {
+                    font-size: 12px;
+                }
+            }
+        }
+    }
+
+    .summary-card {
+        .summary-content {
+            .summary-row {
+                font-size: 13px;
+
+                &.total-row {
+                    font-size: 14px;
+
+                    .total-amount {
+                        font-size: 16px;
+                    }
+                }
+            }
+        }
+    }
+
+    .actions-card {
+        .ant-btn {
+            font-size: 13px;
+        }
+    }
+}
