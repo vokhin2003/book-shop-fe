@@ -178,7 +178,7 @@ const LayoutAdmin = () => {
                             >
                                 <Space style={{ cursor: "pointer" }}>
                                     Welcome {user?.fullName}
-                                    <Avatar>
+                                    <Avatar src={user?.avatar} size="large">
                                         {" "}
                                         {user?.fullName
                                             ?.substring(0, 2)

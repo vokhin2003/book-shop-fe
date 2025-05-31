@@ -25,6 +25,10 @@ export const logoutAPI = () => {
     return axios.post<IBackendRes<null>>("/api/v1/auth/logout");
 }
 
+export const changePasswordAPI = (id: number, oldPassword: string, newPassword: string) => {
+    return axios.post<IBackendRes<null>>('api/v1/auth/change-password', { id, oldPassword, newPassword });
+}
+
 /**
  * 
 Module User
@@ -45,6 +49,10 @@ export const deleteUserAPI = (id: number) => {
 
 export const fetchUserAPI = (query: string) => {
     return axios.get<IBackendRes<IModelPaginate<IUser>>>(`/api/v1/users?${query}`);
+}
+
+export const updateUserInfoAPI = (id: number, fullName: string, phone: string, avatar: string, address: string) => {
+    return axios.put<IBackendRes<IUser>>('/api/v1/users/info', { id, fullName, phone, avatar, address });
 }
 
 /**

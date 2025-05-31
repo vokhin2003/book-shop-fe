@@ -119,6 +119,14 @@ export const accountSlice = createSlice({
         setRefreshTokenAction: (state, action) => {
             state.isRefreshToken = action.payload?.status ?? false;
             state.errorRefreshToken = action.payload?.message ?? "";
+        },
+
+        setUpdateUserInfo: (state, action) => {
+            const { fullName, phone, address, avatar } = action.payload;
+            state.user.fullName = fullName;
+            state.user.phone = phone;
+            state.user.address = address;
+            state.user.avatar = avatar;
         }
     },
     extraReducers: (builder) => {
@@ -153,7 +161,7 @@ export const accountSlice = createSlice({
 });
 
 export const {
-    setActiveMenu, setRefreshTokenAction, setUserLoginInfo, setLogoutAction
+    setActiveMenu, setRefreshTokenAction, setUserLoginInfo, setLogoutAction, setUpdateUserInfo
 } = accountSlice.actions;
 
 export default accountSlice.reducer;

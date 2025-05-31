@@ -13,6 +13,7 @@ import { logoutAPI } from "@/services/api";
 import { setLogoutAction } from "@/redux/slice/accountSlice";
 import { convertSlug } from "@/utils";
 import { clearCartAction } from "@/redux/slice/cartSlice";
+import ManageAccount from "./account";
 
 interface IProps {
     searchTerm: string;
@@ -157,9 +158,9 @@ const Header = (props: IProps) => {
         });
     }
 
-    const urlAvatar = `${import.meta.env.VITE_BACKEND_URL}/images/avatar/${
-        user?.avatar
-    }`;
+    // const urlAvatar = `${import.meta.env.VITE_BACKEND_URL}/images/avatar/${
+    //     user?.avatar
+    // }`;
 
     const contentPopover = () => {
         // Chỉ hiển thị tối đa 4 sản phẩm
@@ -317,7 +318,7 @@ const Header = (props: IProps) => {
                                         trigger={["click"]}
                                     >
                                         <Space>
-                                            <Avatar src={urlAvatar} />
+                                            <Avatar src={user.avatar} />
                                             {user?.fullName}
                                         </Space>
                                     </Dropdown>
@@ -340,10 +341,10 @@ const Header = (props: IProps) => {
                 <Divider />
             </Drawer>
 
-            {/* <ManageAccount
+            <ManageAccount
                 isModalOpen={openManageAccount}
                 setIsModalOpen={setOpenManageAccount}
-            /> */}
+            />
         </>
     );
 };
