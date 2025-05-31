@@ -18,19 +18,27 @@ type FieldType = {
     newPassword: string;
 };
 
-const ChangePassword = () => {
+interface IProps {
+    isModalOpen: boolean;
+    setIsModalOpen?: (value: boolean) => void;
+}
+const ChangePassword = ({ isModalOpen, setIsModalOpen }: IProps) => {
     const [form] = Form.useForm();
     const [isSubmit, setIsSubmit] = useState<boolean>(false);
 
     const user = useAppSelector((state) => state.account.user);
 
     useEffect(() => {
-        if (user) {
+        if (user && isModalOpen) {
             form.setFieldsValue({
                 email: user.email,
+                oldPassword: "",
+                newPassword: "",
             });
+        } else if (!isModalOpen) {
+            form.resetFields(); // Reset form khi modal đóng
         }
-    }, [user]);
+    }, [user, isModalOpen, form]);
 
     const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
         const { newPassword, oldPassword } = values;
@@ -40,6 +48,11 @@ const ChangePassword = () => {
             message.success("Cập nhật mật khẩu thành công");
             form.setFieldValue("oldPassword", "");
             form.setFieldValue("newPassword", "");
+            if (setIsModalOpen) {
+                setIsModalOpen(false); // Đóng modal sau khi đổi mật khẩu thành công
+            }
+
+            // form.resetFields(); // Reset form sau khi đổi mật khẩu thành công
         } else {
             notification.error({
                 message: "Đã có lỗi xảy ra",

@@ -29,7 +29,12 @@ type FieldType = {
 
 const { TextArea } = Input;
 
-const UserInfo = () => {
+interface IProps {
+    isModalOpen: boolean;
+    setIsModalOpen?: (value: boolean) => void;
+}
+
+const UserInfo = ({ isModalOpen, setIsModalOpen }: IProps) => {
     // const { user, setUser } = useCurrentApp();
     const [form] = Form.useForm();
 
@@ -40,7 +45,7 @@ const UserInfo = () => {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        if (user) {
+        if (user && isModalOpen) {
             form.setFieldsValue({
                 id: user.id,
                 email: user.email,
@@ -48,8 +53,12 @@ const UserInfo = () => {
                 phone: user.phone,
                 address: user.address,
             });
+            setUserAvatar(user.avatar); // Reset avatar về giá trị ban đầu
+        } else if (!isModalOpen) {
+            form.resetFields();
+            setUserAvatar(user.avatar); // Reset form khi modal đóng
         }
-    }, [user]);
+    }, [user, isModalOpen, form]);
 
     const handleUploadFile = async (options: RcCustomRequestOptions) => {
         const { onSuccess } = options;
@@ -104,6 +113,9 @@ const UserInfo = () => {
             );
             message.success("Cập nhật thông tin thành công");
             localStorage.removeItem("access_token");
+            if (setIsModalOpen) {
+                setIsModalOpen(false); // Đóng modal sau khi cập nhật thành công
+            }
         } else {
             notification.error({
                 message: "Đã có lỗi xảy ra",
@@ -130,7 +142,7 @@ const UserInfo = () => {
                                 }}
                                 icon={<AntDesignOutlined />}
                                 shape="circle"
-                                src={user.avatar}
+                                src={userAvatar}
                             />
                         </Col>
                         <Col span={24}>
