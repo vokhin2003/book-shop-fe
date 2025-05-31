@@ -12,6 +12,8 @@ import {
     Row,
     Col,
     Space,
+    Modal,
+    notification,
 } from "antd";
 import {
     ArrowLeftOutlined,
@@ -22,59 +24,9 @@ import {
 } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 import "styles/order.detail.scss";
-import { getOrderDetailAPI } from "@/services/api";
+import { cancelOrderAPI, getOrderDetailAPI } from "@/services/api";
 import { convertSlug } from "@/utils";
-
-// Using the same interfaces from HistoryPage
-interface ICategory {
-    id: number;
-    name: string;
-    description: string | null;
-    createdAt?: string;
-    updatedAt?: string;
-}
-
-interface IBook {
-    id: number;
-    title: string;
-    thumbnail: string;
-    slider: string[];
-    author: string;
-    price: number;
-    quantity: number;
-    description: string | null;
-    category: ICategory;
-    createdAt?: string;
-    updatedAt?: string;
-    discount: number;
-    sold: number;
-    age: number;
-    publicationDate: string;
-    publisher: string;
-    pageCount: number;
-    coverType: string;
-}
-
-interface IOrderItem {
-    id: number;
-    quantity: number;
-    price: number;
-    book: IBook;
-}
-
-interface IOrder {
-    id: number;
-    fullName: string;
-    phone: string;
-    totalAmount: number;
-    shippingAddress: string;
-    paymentMethod: string;
-    status: string;
-    userId: number;
-    orderItems: IOrderItem[];
-    createdAt?: string;
-    updatedAt?: string;
-}
+import { IBook, IOrder, IOrderItem } from "@/types/backend";
 
 const STATUS_STEPS = {
     PENDING: 0,
@@ -174,8 +126,33 @@ const OrderDetailPage: React.FC = () => {
         message.info("Chức năng mua lại đang được phát triển");
     };
 
-    const handleCancelOrder = () => {
-        message.info("Chức năng hủy đơn hàng đang được phát triển");
+    const handleCancelOrder = async () => {
+        // message.info("Chức năng hủy đơn hàng đang được phát triển");
+
+        Modal.confirm({
+            title: "Xác nhận hủy đơn hàng",
+            content: `Bạn có chắc muốn hủy đơn hàng #${orderId}? Hành động này không thể hoàn tác.`,
+            okText: "Hủy đơn hàng",
+            okType: "danger",
+            cancelText: "Quay lại",
+            onOk: async () => {
+                const res = await cancelOrderAPI(Number(orderId));
+                if (res.data) {
+                    message.success("Đơn hàng đã được hủy thành công!");
+                    navigate("/history");
+                } else {
+                    notification.error({
+                        message: "Lỗi hủy đơn hàng",
+                        description:
+                            res.message ||
+                            "Đã xảy ra lỗi khi hủy đơn hàng. Vui lòng thử lại sau.",
+                    });
+                }
+            },
+            onCancel: () => {
+                // message.info("Hủy bỏ hành động");
+            },
+        });
     };
 
     const handleViewBook = (item: IBook) => {
@@ -308,7 +285,7 @@ const OrderDetailPage: React.FC = () => {
                         {/* Order Items */}
                         <Card title="Sản phẩm đã đặt" className="items-card">
                             <div className="order-items">
-                                {order.orderItems.map((item) => (
+                                {order.orderItems.map((item: IOrderItem) => (
                                     <div
                                         key={item.id}
                                         className="order-item"

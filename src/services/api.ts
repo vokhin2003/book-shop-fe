@@ -1,4 +1,4 @@
-import { IAccount, IBackendRes, IBook, IBookRequest, ICartItem, ICategory, ICreateOrderRequest, IModelPaginate, IOrder, IPaymentResponse, IPaymentResult, IPermission, IRole, IUploadFile, IUser } from "@/types/backend";
+import { EOrderStatus, IAccount, IBackendRes, IBook, IBookRequest, ICartItem, ICategory, ICreateOrderRequest, IModelPaginate, IOrder, IPaymentResponse, IPaymentResult, IPermission, IRole, IUploadFile, IUser } from "@/types/backend";
 import axios from "services/axios.customize"
 
 /**
@@ -202,4 +202,8 @@ export const historyOrderAPI = (query: string) => {
 
 export const getOrderDetailAPI = (orderId: number) => {
     return axios.get<IBackendRes<IOrder>>(`/api/v1/orders/${orderId}`);
+}
+
+export const cancelOrderAPI = (orderId: number) => {
+    return axios.put<IBackendRes<{ orderId: number, status: EOrderStatus }>>(`/api/v1/orders/${orderId}/cancel`);
 }

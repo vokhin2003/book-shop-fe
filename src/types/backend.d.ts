@@ -182,3 +182,11 @@ export interface IPaymentResponse {
     status: string;
     message: string;
 }
+
+export enum EOrderStatus {
+    PENDING = "PENDING",
+    CONFIRMED = "CONFIRMED",
+    SHIPPING = "SHIPPING",
+    DELIVERED = "DELIVERED",
+    CANCELLED = "CANCELLED"
+}
