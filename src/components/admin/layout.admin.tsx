@@ -48,6 +48,11 @@ const LayoutAdmin = () => {
                 icon: <ExceptionOutlined />,
             },
             {
+                label: <Link to="/admin/order">Order</Link>,
+                key: "/admin/order",
+                icon: <ScheduleOutlined />,
+            },
+            {
                 label: <Link to="/admin/user">User</Link>,
                 key: "/admin/user",
                 icon: <UserOutlined />,

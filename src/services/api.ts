@@ -200,12 +200,17 @@ export const fetchOrderByIdAPI = (id: number) => {
     return axios.get<IBackendRes<IOrder>>(`/api/v1/orders/${id}`);
 };
 
-export const createOrderAPI = (order: any) => {
-    return axios.post<IBackendRes<IOrder>>('/api/v1/orders', order);
+export const createOrderAPI = (order: ICreateOrderRequest) => {
+    return axios.post<IBackendRes<IOrder>>('/api/v1/admin/orders', order);
 };
 
-export const updateOrderAPI = (id: number, order: any) => {
-    return axios.put<IBackendRes<IOrder>>(`/api/v1/orders/${id}`, order);
+export const updateOrderAPI = (id: number, order: {
+    fullName: string;
+    phone: string;
+    shippingAddress: string;
+    status: EOrderStatus;
+}) => {
+    return axios.put<IBackendRes<IOrder>>(`/api/v1/admin/orders/${id}`, order);
 };
 
 /**

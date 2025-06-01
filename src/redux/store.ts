@@ -10,6 +10,7 @@ import permissionReducer from "./slice/permissionSlice"
 import bookReducer from "./slice/bookSlice"
 import categoryReducer from "./slice/categorySlice"
 import cartReducer from "./slice/cartSlice"
+import orderReducer from "./slice/orderSlice"
 
 export const store = configureStore({
     reducer: {
@@ -19,7 +20,8 @@ export const store = configureStore({
         permission: permissionReducer,
         book: bookReducer,
         category: categoryReducer,
-        cart: cartReducer
+        cart: cartReducer,
+        order: orderReducer,
     },
 });
 

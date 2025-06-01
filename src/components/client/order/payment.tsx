@@ -115,6 +115,7 @@ const Payment = (props: IProps) => {
                 message.success("Đặt hàng thành công!");
                 setCurrentStep(2);
             } else if (values.paymentMethod === "VNPAY") {
+                dispatch(clearCart());
                 // Với VNPay, gọi API lấy paymentUrl
                 const paymentData = {
                     orderId: order.id,

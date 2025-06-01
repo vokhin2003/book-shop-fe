@@ -29,6 +29,7 @@ import HistoryPage from "./pages/client/history";
 import OrderDetailPage from "./pages/client/order.detail";
 import ViewUpsertOrder from "./components/admin/order/upsert.order";
 import OrderManagePage from "./pages/admin/order/order";
+import VerifyReturn from "./pages/auth/verify.return";
 
 function App() {
     const dispatch = useAppDispatch();
@@ -97,7 +98,7 @@ function App() {
                     ),
                 },
                 {
-                    path: "payment/return",
+                    path: "payment/return/:transactionId",
                     element: <PaymentReturn />,
                 },
                 {
@@ -157,6 +158,27 @@ function App() {
                     ],
                 },
                 {
+                    path: "order",
+                    children: [
+                        {
+                            index: true,
+                            element: (
+                                <ProtectedRoute>
+                                    <OrderManagePage />
+                                </ProtectedRoute>
+                            ),
+                        },
+                        {
+                            path: "upsert",
+                            element: (
+                                <ProtectedRoute>
+                                    <ViewUpsertOrder />
+                                </ProtectedRoute>
+                            ),
+                        },
+                    ],
+                },
+                {
                     path: "user",
                     element: (
                         <ProtectedRoute>
@@ -189,6 +211,10 @@ function App() {
         {
             path: "/register",
             element: <RegisterPage />,
+        },
+        {
+            path: "/verify/return",
+            element: <VerifyReturn />,
         },
     ]);
 
