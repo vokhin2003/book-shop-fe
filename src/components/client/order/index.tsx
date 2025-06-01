@@ -22,17 +22,14 @@ interface IProps {
 
 const OrderDetail = (props: IProps) => {
     const { setCurrentStep } = props;
-    // const { carts, setCarts } = useCurrentApp();
     const [totalPrice, setTotalPrice] = useState<number>(0);
 
     const carts = useAppSelector((state) => state.cart.items);
-
     const dispatch = useAppDispatch();
 
     const handleOnChangeInput = async (value: number, book: IBook) => {
         if (!value || value < 1) return;
         if (!isNaN(value)) {
-            console.log("handleOnChangeInput", value, book);
             try {
                 await dispatch(
                     updateCart({
@@ -75,7 +72,6 @@ const OrderDetail = (props: IProps) => {
                     item.quantity *
                     (item.book.price * (1 - item.book.discount / 100));
             });
-
             setTotalPrice(sum);
         } else {
             setTotalPrice(0);
@@ -96,100 +92,87 @@ const OrderDetail = (props: IProps) => {
                 {carts?.map((item) => {
                     const currentBookPrice =
                         item.book.price * (1 - item.book.discount / 100);
+                    const originalPrice = item.book.price;
+                    const hasDiscount = item.book.discount > 0;
+
                     return (
-                        <div
-                            className="order-book"
-                            key={`index-${item.id}`}
-                            style={isMobile ? { flexDirection: "column" } : {}}
-                        >
-                            {!isMobile ? (
-                                <>
-                                    <div className="book-content">
-                                        <img src={item.book.thumbnail} />
-                                        <div className="title">
-                                            {item.book.title}
-                                        </div>
-                                        <div className="price">
-                                            {new Intl.NumberFormat("vi-VN", {
-                                                style: "currency",
-                                                currency: "VND",
-                                            }).format(currentBookPrice)}
-                                        </div>
-                                    </div>
-                                    <div className="action">
-                                        <div className="quantity">
-                                            <InputNumber
-                                                onChange={(value) =>
-                                                    handleOnChangeInput(
-                                                        value as number,
-                                                        item.book
-                                                    )
-                                                }
-                                                value={item.quantity}
-                                                max={item.book.quantity}
-                                                min={1}
-                                            />
-                                        </div>
-                                        <div className="sum">
-                                            Tổng:{" "}
-                                            {new Intl.NumberFormat("vi-VN", {
-                                                style: "currency",
-                                                currency: "VND",
-                                            }).format(
-                                                currentBookPrice *
-                                                    (item?.quantity ?? 0)
-                                            )}
-                                        </div>
-                                        <DeleteTwoTone
-                                            style={{ cursor: "pointer" }}
-                                            onClick={() =>
-                                                handleRemoveBook(item.book.id)
-                                            }
-                                            twoToneColor="#eb2f96"
-                                        />
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <div>{item.book.title}</div>
-                                    <div
-                                        className="book-content"
-                                        style={{ width: "100%" }}
-                                    >
-                                        <img src={item.book.thumbnail} />
-                                        <div className="action">
-                                            <div className="quantity">
-                                                <InputNumber
-                                                    onChange={(value) =>
-                                                        handleOnChangeInput(
-                                                            value as number,
-                                                            item.book
-                                                        )
-                                                    }
-                                                    value={item.quantity}
-                                                />
-                                            </div>
-                                            <DeleteTwoTone
-                                                style={{ cursor: "pointer" }}
-                                                onClick={() =>
-                                                    handleRemoveBook(item.id)
-                                                }
-                                                twoToneColor="#eb2f96"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="sum">
-                                        Tổng:{" "}
+                        <div className="order-book" key={`index-${item.id}`}>
+                            <div className="book-image">
+                                <img
+                                    src={item.book.thumbnail}
+                                    alt={item.book.title}
+                                />
+                            </div>
+
+                            <div className="book-info">
+                                <div className="book-title">
+                                    {item.book.title}
+                                </div>
+                                <div className="book-category">
+                                    Thể loại:{" "}
+                                    {item.book.category?.name ||
+                                        "Không xác định"}
+                                </div>
+                                {/* <div className="book-stock">
+                                    {item.book.quantity > 0
+                                        ? `Còn ${item.book.quantity} sản phẩm`
+                                        : "Hết hàng"}
+                                </div> */}
+                            </div>
+
+                            <div className="book-price">
+                                {hasDiscount && (
+                                    <span className="original-price">
                                         {new Intl.NumberFormat("vi-VN", {
                                             style: "currency",
                                             currency: "VND",
-                                        }).format(
-                                            currentBookPrice *
-                                                (item.quantity ?? 0)
-                                        )}
-                                    </div>
-                                </>
-                            )}
+                                        }).format(originalPrice)}
+                                    </span>
+                                )}
+                                <span className="current-price">
+                                    {new Intl.NumberFormat("vi-VN", {
+                                        style: "currency",
+                                        currency: "VND",
+                                    }).format(currentBookPrice)}
+                                </span>
+                            </div>
+
+                            <div className="book-quantity">
+                                <InputNumber
+                                    onChange={(value) =>
+                                        handleOnChangeInput(
+                                            value as number,
+                                            item.book
+                                        )
+                                    }
+                                    value={item.quantity}
+                                    max={item.book.quantity}
+                                    min={1}
+                                    size="small"
+                                />
+                            </div>
+
+                            <div className="book-total">
+                                {new Intl.NumberFormat("vi-VN", {
+                                    style: "currency",
+                                    currency: "VND",
+                                }).format(
+                                    currentBookPrice * (item?.quantity ?? 0)
+                                )}
+                            </div>
+
+                            <div className="book-actions">
+                                <DeleteTwoTone
+                                    style={{
+                                        cursor: "pointer",
+                                        fontSize: "16px",
+                                    }}
+                                    onClick={() =>
+                                        handleRemoveBook(item.book.id)
+                                    }
+                                    twoToneColor="#ff4d4f"
+                                />
+                            </div>
                         </div>
                     );
                 })}
@@ -204,7 +187,7 @@ const OrderDetail = (props: IProps) => {
             <Col md={6} xs={24}>
                 <div className="order-sum">
                     <div className="calculate">
-                        <span> Tạm tính</span>
+                        <span>Tạm tính</span>
                         <span>
                             {new Intl.NumberFormat("vi-VN", {
                                 style: "currency",
@@ -214,7 +197,7 @@ const OrderDetail = (props: IProps) => {
                     </div>
                     <Divider style={{ margin: "10px 0" }} />
                     <div className="calculate">
-                        <span> Tổng tiền</span>
+                        <span>Tổng tiền</span>
                         <span className="sum-final">
                             {new Intl.NumberFormat("vi-VN", {
                                 style: "currency",
@@ -225,19 +208,10 @@ const OrderDetail = (props: IProps) => {
                     <Divider style={{ margin: "10px 0" }} />
                     <button
                         disabled={carts.length === 0}
-                        // onClick={() => setCurrentStep(1)}
                         onClick={() => handleNextStep()}
                     >
                         Mua Hàng ({carts?.length ?? 0})
                     </button>
-                    {/* <Button
-                        color="danger"
-                        variant="solid"
-                        onClick={() => handleNextStep()}
-                        // loading={true}
-                    >
-                        Mua Hàng ({carts?.length ?? 0})
-                    </Button> */}
                 </div>
             </Col>
         </Row>

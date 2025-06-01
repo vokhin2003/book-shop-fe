@@ -9,6 +9,7 @@ const LayoutClient = () => {
     const location = useLocation();
     const rootRef = useRef<HTMLDivElement>(null);
     const [filter, setFilter] = useState<string>("");
+    const [current, setCurrent] = useState<number>(1);
 
     useEffect(() => {
         if (rootRef && rootRef.current) {
@@ -23,10 +24,19 @@ const LayoutClient = () => {
                 setSearchTerm={setSearchTerm}
                 filter={filter}
                 setFilter={setFilter}
+                current={current}
+                setCurrent={setCurrent}
             />
             <div className={styles["content-app"]}>
                 <Outlet
-                    context={{ searchTerm, setSearchTerm, filter, setFilter }}
+                    context={{
+                        searchTerm,
+                        setSearchTerm,
+                        filter,
+                        setFilter,
+                        current,
+                        setCurrent,
+                    }}
                 />
             </div>
             <Footer />

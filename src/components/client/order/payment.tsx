@@ -85,43 +85,6 @@ const Payment = (props: IProps) => {
         // }
     };
 
-    // const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    //     console.log(">>> values:", values);
-    //     // const { address, fullName, method, phone } = values;
-    //     // const detail = carts.map((item) => ({
-    //     //     bookName: item.detail.mainText,
-    //     //     quantity: item.quantity,
-    //     //     _id: item._id,
-    //     // }));
-    //     const items = carts.map((item) => ({
-    //         bookId: item.book.id,
-    //         quantity: item.quantity,
-    //     }));
-
-    //     const submitData: ICreateOrderRequest = {
-    //         fullName: values.fullName,
-    //         phone: values.phone,
-    //         shippingAddress: values.shippingAddress,
-    //         paymentMethod: values.paymentMethod,
-    //         items: items,
-    //     };
-    //     setIsSubmit(true);
-    //     const res = await placeOrderAPI(submitData);
-    //     if (res.data) {
-    //         // localStorage.removeItem("carts");
-    //         // setCarts([]);
-    //         dispatch(clearCart());
-    //         message.success("Đặt hàng thành công!");
-    //         setCurrentStep(2);
-    //     } else {
-    //         notification.error({
-    //             message: "Đã có lỗi xảy ra",
-    //             description: res.message,
-    //         });
-    //     }
-    //     setIsSubmit(false);
-    // };
-
     const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
         console.log(">>> values:", values);
         const items = carts.map((item) => ({
@@ -193,6 +156,11 @@ const Payment = (props: IProps) => {
                 {carts?.map((item, index) => {
                     const currentBookPrice =
                         item.book.price * (1 - item.book.discount / 100);
+
+                    // const currentBookPrice =
+                    // item.book.price * (1 - item.book.discount / 100);
+                    const originalPrice = item.book.price;
+                    const hasDiscount = item.book.discount > 0;
                     return (
                         <div
                             className="order-book"
@@ -201,37 +169,65 @@ const Payment = (props: IProps) => {
                         >
                             {!isMobile ? (
                                 <>
-                                    <div className="book-content">
-                                        <img src={item.book.thumbnail} />
-                                        <div className="title">
+                                    <div className="book-image">
+                                        <img
+                                            src={item.book.thumbnail}
+                                            alt={item.book.title}
+                                        />
+                                    </div>
+                                    <div className="book-info">
+                                        <div className="book-title">
                                             {item.book.title}
                                         </div>
-                                        <div className="price">
+                                        <div className="book-category">
+                                            Thể loại:{" "}
+                                            {item.book.category?.name ||
+                                                "Không xác định"}
+                                        </div>
+                                        {/* <div className="book-stock">
+                                    {item.book.quantity > 0
+                                        ? `Còn ${item.book.quantity} sản phẩm`
+                                        : "Hết hàng"}
+                                </div> */}
+                                    </div>
+
+                                    <div className="book-price">
+                                        {/* {hasDiscount && (
+                                            <span className="original-price">
+                                                {new Intl.NumberFormat(
+                                                    "vi-VN",
+                                                    {
+                                                        style: "currency",
+                                                        currency: "VND",
+                                                    }
+                                                ).format(originalPrice)}
+                                            </span>
+                                        )} */}
+
+                                        <span className="current-price">
                                             {new Intl.NumberFormat("vi-VN", {
                                                 style: "currency",
                                                 currency: "VND",
                                             }).format(currentBookPrice)}
-                                        </div>
+                                        </span>
                                     </div>
-                                    <div className="action">
+
+                                    <div className="book-quantity">
                                         <div className="quantity">
                                             Số lượng: {item.quantity}
                                         </div>
-                                        <div className="sum">
-                                            Tổng:{" "}
-                                            {new Intl.NumberFormat("vi-VN", {
-                                                style: "currency",
-                                                currency: "VND",
-                                            }).format(
-                                                currentBookPrice * item.quantity
-                                            )}
-                                        </div>
+                                    </div>
+
+                                    <div className="book-actions">
                                         <DeleteTwoTone
-                                            style={{ cursor: "pointer" }}
+                                            style={{
+                                                cursor: "pointer",
+                                                fontSize: "16px",
+                                            }}
                                             onClick={() =>
-                                                handleRemoveBook(item.id)
+                                                handleRemoveBook(item.book.id)
                                             }
-                                            twoToneColor="#eb2f96"
+                                            twoToneColor="#ff4d4f"
                                         />
                                     </div>
                                 </>

@@ -29,8 +29,14 @@ type FieldType = {
 };
 
 const HomePage = () => {
-    const { searchTerm, filter, setFilter, setSearchTerm } =
-        useOutletContext() as any;
+    const {
+        searchTerm,
+        filter,
+        setFilter,
+        setSearchTerm,
+        current,
+        setCurrent,
+    } = useOutletContext() as any;
 
     const [showMobileFilter, setShowMobileFilter] = useState<boolean>(false);
 
@@ -42,7 +48,6 @@ const HomePage = () => {
     >([]);
 
     const [listBook, setListBook] = useState<IBook[]>([]);
-    const [current, setCurrent] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
     const [total, setTotal] = useState<number>(0);
 
@@ -285,6 +290,7 @@ const HomePage = () => {
                                             form.resetFields();
                                             setFilter("");
                                             setSearchTerm("");
+                                            setCurrent(1);
                                         }}
                                     />
                                 </div>

@@ -20,10 +20,19 @@ interface IProps {
     setSearchTerm: (value: string) => void;
     filter: string;
     setFilter: (value: string) => void;
+    current: number;
+    setCurrent: (value: number) => void;
 }
 
 const Header = (props: IProps) => {
-    const { searchTerm, setSearchTerm, filter, setFilter } = props;
+    const {
+        searchTerm,
+        setSearchTerm,
+        filter,
+        setFilter,
+        current,
+        setCurrent,
+    } = props;
 
     // const { carts, setCarts } = useCurrentApp();
     const [openDrawer, setOpenDrawer] = useState(false);
@@ -100,12 +109,14 @@ const Header = (props: IProps) => {
         // Nếu filter hiện tại rỗng
         if (!filter) {
             setFilter(`(title~~'${cleanSearchQuery}')`);
+            setCurrent(1);
             return;
         }
 
         // Kiểm tra nếu filter chỉ chứa một điều kiện tìm kiếm
         if (filter.match(/^\(title~~'[^']*'\)$/)) {
             setFilter(`(title~~'${cleanSearchQuery}')`);
+            setCurrent(1);
             return;
         }
 
@@ -121,6 +132,7 @@ const Header = (props: IProps) => {
 
         // Kết hợp baseFilterQuery với điều kiện tìm kiếm mới
         setFilter(`${baseFilterQuery} and (title~~'${cleanSearchQuery}')`);
+        setCurrent(1);
     };
 
     const items = [
