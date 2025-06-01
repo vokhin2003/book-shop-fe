@@ -57,7 +57,7 @@ const OrderPage = () => {
     const getStatusLabel = (status?: string) => {
         switch (status) {
             case EOrderStatus.PENDING:
-                return "Chờ thanh toán";
+                return "Chờ xác nhận";
             case EOrderStatus.CONFIRMED:
                 return "Đã xác nhận";
             case EOrderStatus.SHIPPING:
@@ -128,7 +128,7 @@ const OrderPage = () => {
             ),
             valueType: "select",
             valueEnum: {
-                [EOrderStatus.PENDING]: { text: "Chờ thanh toán" },
+                [EOrderStatus.PENDING]: { text: "Chờ xác nhận" },
                 [EOrderStatus.CONFIRMED]: { text: "Đã xác nhận" },
                 [EOrderStatus.SHIPPING]: { text: "Đang giao hàng" },
                 [EOrderStatus.DELIVERED]: { text: "Đã giao hàng" },

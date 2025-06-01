@@ -27,10 +27,10 @@ const ORDER_STATUS_VALUES = {
 
 const STATUS_LABELS = {
     [ORDER_STATUS.ALL]: "Tất cả",
-    [ORDER_STATUS.PENDING]: "Chờ thanh toán",
-    [ORDER_STATUS.CONFIRMED]: "Vận chuyển",
-    [ORDER_STATUS.SHIPPING]: "Chờ giao hàng",
-    [ORDER_STATUS.DELIVERED]: "Hoàn thành",
+    [ORDER_STATUS.PENDING]: "Chờ xác nhận",
+    [ORDER_STATUS.CONFIRMED]: "Đã xác nhận",
+    [ORDER_STATUS.SHIPPING]: "Đang giao hàng",
+    [ORDER_STATUS.DELIVERED]: "Đã giao hàng",
     [ORDER_STATUS.CANCELLED]: "Đã hủy",
 };
 

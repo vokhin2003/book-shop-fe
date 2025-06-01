@@ -37,7 +37,7 @@ const STATUS_STEPS = {
 };
 
 const STATUS_LABELS = {
-    PENDING: "Chờ thanh toán",
+    PENDING: "Chờ xác nhận",
     CONFIRMED: "Đã xác nhận",
     SHIPPING: "Đang giao hàng",
     DELIVERED: "Đã giao hàng",
@@ -224,7 +224,7 @@ const OrderDetailPage: React.FC = () => {
                                     current={getCurrentStep(order.status)}
                                     items={[
                                         {
-                                            title: "Chờ thanh toán",
+                                            title: "Chờ xác nhận",
                                             icon: <ClockCircleOutlined />,
                                         },
                                         {
