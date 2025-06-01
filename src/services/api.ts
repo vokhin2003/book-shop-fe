@@ -189,7 +189,28 @@ export const fetchCartAPI = () => {
 
 /**
  * 
-Module Order
+Module Order Admin
+ */
+
+export const fetchOrderAPI = (query: string) => {
+    return axios.get<IBackendRes<IModelPaginate<IOrder>>>(`/api/v1/orders?${query}`);
+};
+
+export const fetchOrderByIdAPI = (id: number) => {
+    return axios.get<IBackendRes<IOrder>>(`/api/v1/orders/${id}`);
+};
+
+export const createOrderAPI = (order: any) => {
+    return axios.post<IBackendRes<IOrder>>('/api/v1/orders', order);
+};
+
+export const updateOrderAPI = (id: number, order: any) => {
+    return axios.put<IBackendRes<IOrder>>(`/api/v1/orders/${id}`, order);
+};
+
+/**
+ * 
+Module Order User
  */
 
 export const placeOrderAPI = (order: ICreateOrderRequest) => {

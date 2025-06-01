@@ -27,6 +27,8 @@ import OrderPage from "./pages/client/order";
 import PaymentReturn from "./components/client/order/PaymentReturn";
 import HistoryPage from "./pages/client/history";
 import OrderDetailPage from "./pages/client/order.detail";
+import ViewUpsertOrder from "./components/admin/order/upsert.order";
+import OrderManagePage from "./pages/admin/order/order";
 
 function App() {
     const dispatch = useAppDispatch();
