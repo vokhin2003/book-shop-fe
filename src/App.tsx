@@ -25,48 +25,35 @@ import OrderDetailPage from "./pages/client/order.detail";
 import ViewUpsertOrder from "./components/admin/order/upsert.order";
 import OrderManagePage from "./pages/admin/order/order";
 import VerifyReturn from "./pages/auth/verify.return";
+import { generateToken, messaging } from "@/notifications/firebase";
+import { onMessage } from "firebase/messaging";
+import { notification } from "antd";
 
 function App() {
   const dispatch = useAppDispatch();
 
-  // ...existing code...
-  // useEffect(() => {
-  //     if (
-  //         window.location.pathname === "/login" ||
-  //         window.location.pathname === "/register"
-  //     )
-  //         return;
-
-  //     const fetchAccount = async () => {
-  //         const res = getAccountAPI();
-  //         console.log(res);
-  //     };
-
-  //     fetchAccount();
-
-  //     // dispatch(fetchAccount()); // <-- Sửa ở đây
-  // }, []);
-  // ...existing code...
-
   useEffect(() => {
-    console.log("useEffect triggered");
     if (
       window.location.pathname === "/login" ||
       window.location.pathname === "/register"
     ) {
-      console.log("Skipping fetchAccount due to login/register page");
       return;
     }
-    // if (localStorage.getItem('access_token')) {
-    //     console.log('Dispatching fetchAccount');
-    //     dispatch(fetchAccount());
-    // } else {
-    //     console.log('No access token, skipping fetchAccount');
-    // }
 
     dispatch(fetchAccount());
     dispatch(fetchCart());
   }, [dispatch]);
+
+  useEffect(() => {
+    generateToken();
+    onMessage(messaging, (payload) => {
+      console.log(">>> payload: ", payload);
+      notification.info({
+        message: payload.notification?.title,
+        description: payload.notification?.body,
+      });
+    });
+  }, []);
 
   const router = createBrowserRouter([
     // {
