@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { IBook } from "@/types/backend";
 import "styles/book.scss";
 import { Navigate, useNavigate } from "react-router-dom";
-import { useAppDispatch } from "@/redux/hook";
+import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { addToCart } from "@/redux/slice/cartSlice";
 
 interface IProps {
@@ -32,6 +32,9 @@ const BookDetail = (props: IProps) => {
 
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const isAuthenticated = useAppSelector(
+        (state) => state.account.isAuthenticated
+    );
 
     useEffect(() => {
         if (bookData) {
@@ -160,6 +163,15 @@ const BookDetail = (props: IProps) => {
     };
 
     const handleAddToCart = async (quantity: number, book: IBook) => {
+        if (!isAuthenticated) {
+            const callback = encodeURIComponent(
+                window.location.pathname + window.location.search
+            );
+            // return <Navigate to={`/login?callback=${callback}`} replace />;
+            navigate(`/login?callback=${callback}`);
+            return;
+        }
+
         try {
             await dispatch(addToCart({ bookId: book.id, quantity })).unwrap();
             message.success("Sản phẩm đã được thêm vào giỏ hàng");
@@ -184,6 +196,15 @@ const BookDetail = (props: IProps) => {
         //         description: res.message,
         //     });
         // }
+
+        if (!isAuthenticated) {
+            const callback = encodeURIComponent(
+                window.location.pathname + window.location.search
+            );
+            // return <Navigate to={`/login?callback=${callback}`} replace />;
+            navigate(`/login?callback=${callback}`);
+            return;
+        }
 
         try {
             await dispatch(addToCart({ bookId: book.id, quantity })).unwrap();

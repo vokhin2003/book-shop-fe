@@ -163,7 +163,7 @@ const Header = (props: IProps) => {
             key: "logout",
         },
     ];
-    if (user?.role === "ADMIN") {
+    if (user?.role === "ADMIN" || user.role.startsWith("admin")) {
         items.unshift({
             label: <Link to="/admin">Trang quản trị</Link>,
             key: "admin",

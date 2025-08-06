@@ -4,56 +4,66 @@ import Loading from "../loading";
 import { useAppSelector } from "@/redux/hook";
 
 const RoleBaseRoute = (props: any) => {
-    const user = useAppSelector((state) => state.account.user);
-    const userRole = user.role;
+  const user = useAppSelector((state) => state.account.user);
+  const userRole = user.role;
 
-    if (userRole !== "NORMAL_USER") {
-        return <>{props.children}</>;
-    } else {
-        return <NotPermitted />;
-    }
+  const isAdminRoute = window.location.pathname.startsWith("/admin");
+
+  // if (userRole !== "CUSTOMER") {
+  //     return <>{props.children}</>;
+  // } else {
+  //     return <NotPermitted />;
+  // }
+
+  if (
+    (isAdminRoute && userRole === "ADMIN") ||
+    (!isAdminRoute && (userRole === "CUSTOMER" || userRole === "ADMIN")) ||
+    (isAdminRoute && userRole.startsWith("admin"))
+  ) {
+    return <>{props.children}</>;
+  } else {
+    return <NotPermitted />;
+  }
 };
 
 const ProtectedRoute = (props: any) => {
-    const isAuthenticated = useAppSelector(
-        (state) => state.account.isAuthenticated
-    );
-    const isLoading = useAppSelector((state) => state.account.isLoading);
+  const isAuthenticated = useAppSelector(
+    (state) => state.account.isAuthenticated
+  );
+  const isLoading = useAppSelector((state) => state.account.isLoading);
 
-    const location = useLocation(); // Thêm useLocation
+  const location = useLocation(); // Thêm useLocation
 
-    console.log(">>> isAuthenticated:", isAuthenticated);
+  // console.log(">>> isAuthenticated:", isAuthenticated);
 
-    // return (
-    //     <>
-    //         {isLoading === true ? (
-    //             <Loading />
-    //         ) : (
-    //             <>
-    //                 {isAuthenticated === true ? (
-    //                     <>
-    //                         <RoleBaseRoute>{props.children}</RoleBaseRoute>
-    //                     </>
-    //                 ) : (
-    //                     <Navigate to="/login" replace />
-    //                 )}
-    //             </>
-    //         )}
-    //     </>
-    // );
+  // return (
+  //     <>
+  //         {isLoading === true ? (
+  //             <Loading />
+  //         ) : (
+  //             <>
+  //                 {isAuthenticated === true ? (
+  //                     <>
+  //                         <RoleBaseRoute>{props.children}</RoleBaseRoute>
+  //                     </>
+  //                 ) : (
+  //                     <Navigate to="/login" replace />
+  //                 )}
+  //             </>
+  //         )}
+  //     </>
+  // );
 
-    if (isLoading) {
-        return <Loading />;
-    }
+  if (isLoading) {
+    return <Loading />;
+  }
 
-    if (!isAuthenticated) {
-        const callback = encodeURIComponent(
-            location.pathname + location.search
-        );
-        return <Navigate to={`/login?callback=${callback}`} replace />;
-    }
+  if (!isAuthenticated) {
+    const callback = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?callback=${callback}`} replace />;
+  }
 
-    return <RoleBaseRoute>{props.children}</RoleBaseRoute>;
+  return <RoleBaseRoute>{props.children}</RoleBaseRoute>;
 };
 
 export default ProtectedRoute;
