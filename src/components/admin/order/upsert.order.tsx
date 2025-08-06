@@ -174,32 +174,40 @@ const ViewUpsertOrder = () => {
     const book = books.find((b) => b.value === selectedBook);
     if (!book) return;
 
-    const newItem: IOrderItemForm = {
-      bookId: selectedBook,
-      quantity: itemQuantity,
-      // price: book.price,
-      price: book.price * (1 - book.discount / 100),
-      book: {
-        id: book.value,
-        title: book.label,
-        thumbnail: "",
-        slider: [],
-        author: "Author Name",
-        price: book.price,
-        quantity: book.quantity,
-        description: null,
-        category: { id: 1, name: "Books", description: "" },
-        discount: 0,
-        sold: 0,
-        age: 0,
-        publicationDate: "2024-01-01",
-        publisher: "Publisher",
-        pageCount: 200,
-        coverType: "Hardcover",
-      },
-    };
+    const existingIndex = orderItems.findIndex(
+      (item) => item.bookId === selectedBook
+    );
+    if (existingIndex !== -1) {
+      const updatedItems = [...orderItems];
+      updatedItems[existingIndex].quantity += itemQuantity;
+      setOrderItems(updatedItems);
+    } else {
+      const newItem: IOrderItemForm = {
+        bookId: selectedBook,
+        quantity: itemQuantity,
+        price: book.price * (1 - book.discount / 100),
+        book: {
+          id: book.value,
+          title: book.label,
+          thumbnail: "",
+          slider: [],
+          author: "Author Name",
+          price: book.price,
+          quantity: book.quantity,
+          description: null,
+          category: { id: 1, name: "Books", description: "" },
+          discount: 0,
+          sold: 0,
+          age: 0,
+          publicationDate: "2024-01-01",
+          publisher: "Publisher",
+          pageCount: 200,
+          coverType: "Hardcover",
+        },
+      };
+      setOrderItems([...orderItems, newItem]);
+    }
 
-    setOrderItems([...orderItems, newItem]);
     setIsAddItemModalVisible(false);
     setSelectedBook(null);
     setItemQuantity(1);
