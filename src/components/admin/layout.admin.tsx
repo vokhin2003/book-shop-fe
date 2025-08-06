@@ -22,6 +22,7 @@ import { setLogoutAction } from "@/redux/slice/accountSlice";
 import { clearCartAction } from "@/redux/slice/cartSlice";
 import { ALL_PERMISSIONS } from "@/permission";
 import { ALL } from "dns";
+import { removeToken } from "@/notifications/firebase";
 
 const { Content, Sider } = Layout;
 
@@ -138,6 +139,12 @@ const LayoutAdmin = () => {
   }, [location]);
 
   const handleLogout = async () => {
+    // Lấy userId và deviceToken trước khi xóa
+    const userId = user.id;
+    const deviceToken = localStorage.getItem("deviceToken");
+    if (userId && deviceToken) {
+      await removeToken(userId, deviceToken); // Gọi API xóa device token
+    }
     const res = await logoutAPI();
     if (res && +res.statusCode === 200) {
       dispatch(setLogoutAction({}));

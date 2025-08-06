@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import LoginPage from "pages/auth/login";
 import RegisterPage from "pages/auth/register";
-import { useAppDispatch } from "./redux/hook";
+import { useAppDispatch, useAppSelector } from "./redux/hook";
 import { useEffect } from "react";
 import { fetchAccount } from "./redux/slice/accountSlice";
 import LayoutApp from "components/share/layout.app";
@@ -25,35 +25,43 @@ import OrderDetailPage from "./pages/client/order.detail";
 import ViewUpsertOrder from "./components/admin/order/upsert.order";
 import OrderManagePage from "./pages/admin/order/order";
 import VerifyReturn from "./pages/auth/verify.return";
-import { generateToken, messaging } from "@/notifications/firebase";
-import { onMessage } from "firebase/messaging";
-import { notification } from "antd";
+import {
+  generateToken,
+  messaging,
+  setupForegroundNotification,
+} from "@/notifications/firebase";
 
 function App() {
   const dispatch = useAppDispatch();
+  const { isAuthenticated, user } = useAppSelector((state) => state.account);
 
   useEffect(() => {
     if (
-      window.location.pathname === "/login" ||
-      window.location.pathname === "/register"
+      window.location.pathname !== "/login" &&
+      window.location.pathname !== "/register" &&
+      localStorage.getItem("access_token")
     ) {
-      return;
+      dispatch(fetchAccount());
     }
-
-    dispatch(fetchAccount());
-    dispatch(fetchCart());
   }, [dispatch]);
 
   useEffect(() => {
-    generateToken();
-    onMessage(messaging, (payload) => {
-      console.log(">>> payload: ", payload);
-      notification.info({
-        message: payload.notification?.title,
-        description: payload.notification?.body,
+    // Nếu user được xác thực, lưu deviceToken và thiết lập foreground notification
+    if (isAuthenticated && user.id) {
+      generateToken(user.id).then((token) => {
+        if (token) {
+          setupForegroundNotification(messaging);
+        }
       });
-    });
-  }, []);
+    }
+  }, [isAuthenticated, user.id]);
+
+  useEffect(() => {
+    // Gọi fetchCart khi user được xác thực
+    if (isAuthenticated) {
+      dispatch(fetchCart());
+    }
+  }, [isAuthenticated, dispatch]);
 
   const router = createBrowserRouter([
     // {

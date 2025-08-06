@@ -31,12 +31,22 @@ messaging.onBackgroundMessage((payload) => {
     "[firebase-messaging-sw.js] Received background message ",
     payload
   );
-  // Customize notification here
+
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: payload.notification.image,
+    icon: "/logo.png", // Logo bên trái (phải nằm trong public folder)
+    image: payload.notification.image, // Hình ảnh bổ sung (tùy chọn)
+    data: payload.data, // Dữ liệu bao gồm URL
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data.url; // Lấy URL từ data
+  event.waitUntil(
+    clients.openWindow(url) // Mở URL khi click
+  );
 });
