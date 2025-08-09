@@ -165,8 +165,14 @@ const LoginPage = () => {
               </Form.Item>
               <Divider>Hoặc</Divider>
               <Form.Item>
-                <Button type="primary" block size="large">
-                  <Link to="/register">Đăng Ký</Link>
+                <Button
+                  type="primary"
+                  block
+                  size="large"
+                  htmlType="button"
+                  onClick={() => navigate("/register")}
+                >
+                  Đăng Ký
                 </Button>
               </Form.Item>
             </Form>

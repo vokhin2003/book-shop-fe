@@ -2,57 +2,18 @@ import { Navigate, useLocation } from "react-router-dom";
 import NotPermitted from "./not-permitted";
 import Loading from "../loading";
 import { useAppSelector } from "@/redux/hook";
+import type { ReactNode } from "react";
 
-const RoleBaseRoute = (props: any) => {
-  const user = useAppSelector((state) => state.account.user);
-  const userRole = user.role;
-
-  const isAdminRoute = window.location.pathname.startsWith("/admin");
-
-  // if (userRole !== "CUSTOMER") {
-  //     return <>{props.children}</>;
-  // } else {
-  //     return <NotPermitted />;
-  // }
-
-  if (
-    (isAdminRoute && userRole === "ADMIN") ||
-    (!isAdminRoute && (userRole === "CUSTOMER" || userRole === "ADMIN")) ||
-    (isAdminRoute && userRole.startsWith("admin"))
-  ) {
-    return <>{props.children}</>;
-  } else {
-    return <NotPermitted />;
-  }
+type ProtectedRouteProps = {
+  children: ReactNode;
+  allowedRoles?: string[]; // if provided, only these roles can access
 };
 
-const ProtectedRoute = (props: any) => {
-  const isAuthenticated = useAppSelector(
-    (state) => state.account.isAuthenticated
+const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
+  const { isAuthenticated, isLoading, user } = useAppSelector(
+    (state) => state.account
   );
-  const isLoading = useAppSelector((state) => state.account.isLoading);
-
-  const location = useLocation(); // Thêm useLocation
-
-  // console.log(">>> isAuthenticated:", isAuthenticated);
-
-  // return (
-  //     <>
-  //         {isLoading === true ? (
-  //             <Loading />
-  //         ) : (
-  //             <>
-  //                 {isAuthenticated === true ? (
-  //                     <>
-  //                         <RoleBaseRoute>{props.children}</RoleBaseRoute>
-  //                     </>
-  //                 ) : (
-  //                     <Navigate to="/login" replace />
-  //                 )}
-  //             </>
-  //         )}
-  //     </>
-  // );
+  const location = useLocation();
 
   if (isLoading) {
     return <Loading />;
@@ -63,7 +24,13 @@ const ProtectedRoute = (props: any) => {
     return <Navigate to={`/login?callback=${callback}`} replace />;
   }
 
-  return <RoleBaseRoute>{props.children}</RoleBaseRoute>;
+  if (allowedRoles && allowedRoles.length > 0) {
+    if (!allowedRoles.includes(user.role)) {
+      return <NotPermitted />;
+    }
+  }
+
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

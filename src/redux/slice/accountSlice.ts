@@ -135,6 +135,10 @@ export const accountSlice = createSlice({
       state.user.address = address;
       state.user.avatar = avatar;
     },
+    // Mark auth as initialized when there is no token to verify
+    setAuthInitialized: (state) => {
+      state.isLoading = false;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchAccount.pending, (state) => {
@@ -172,6 +176,7 @@ export const {
   setUserLoginInfo,
   setLogoutAction,
   setUpdateUserInfo,
+  setAuthInitialized,
 } = accountSlice.actions;
 
 export default accountSlice.reducer;

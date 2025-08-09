@@ -3,7 +3,7 @@ import LoginPage from "pages/auth/login";
 import RegisterPage from "pages/auth/register";
 import { useAppDispatch, useAppSelector } from "./redux/hook";
 import { useEffect } from "react";
-import { fetchAccount } from "./redux/slice/accountSlice";
+import { fetchAccount, setAuthInitialized } from "./redux/slice/accountSlice";
 import LayoutApp from "components/share/layout.app";
 import NotFound from "components/share/notfound";
 import LayoutAdmin from "components/admin/layout.admin";
@@ -31,18 +31,19 @@ import {
   setupForegroundNotification,
 } from "@/notifications/firebase";
 import AuthenticatePage from "@/pages/auth/authenticate";
+import GuestRoute from "./components/share/guest-route";
 
 function App() {
   const dispatch = useAppDispatch();
   const { isAuthenticated, user } = useAppSelector((state) => state.account);
 
   useEffect(() => {
-    if (
-      window.location.pathname !== "/login" &&
-      window.location.pathname !== "/register" &&
-      localStorage.getItem("access_token")
-    ) {
+    const hasToken = Boolean(localStorage.getItem("access_token"));
+    if (hasToken) {
       dispatch(fetchAccount());
+    } else {
+      // Không có token → đánh dấu đã init để tránh treo loading
+      dispatch(setAuthInitialized());
     }
   }, [dispatch]);
 
@@ -122,7 +123,7 @@ function App() {
         {
           index: true,
           element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
               <DashboardPage />
             </ProtectedRoute>
           ),
@@ -133,7 +134,7 @@ function App() {
             {
               index: true,
               element: (
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
                   <BookTab />
                 </ProtectedRoute>
               ),
@@ -141,7 +142,7 @@ function App() {
             {
               path: "upsert",
               element: (
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
                   <ViewUpsertBook />
                 </ProtectedRoute>
               ),
@@ -154,7 +155,7 @@ function App() {
             {
               index: true,
               element: (
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
                   <OrderManagePage />
                 </ProtectedRoute>
               ),
@@ -162,7 +163,7 @@ function App() {
             {
               path: "upsert",
               element: (
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
                   <ViewUpsertOrder />
                 </ProtectedRoute>
               ),
@@ -172,7 +173,7 @@ function App() {
         {
           path: "user",
           element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
               <UserPage />
             </ProtectedRoute>
           ),
@@ -180,7 +181,7 @@ function App() {
         {
           path: "role",
           element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
               <RolePage />
             </ProtectedRoute>
           ),
@@ -188,7 +189,7 @@ function App() {
         {
           path: "permission",
           element: (
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
               <PermissionPage />
             </ProtectedRoute>
           ),
@@ -197,11 +198,19 @@ function App() {
     },
     {
       path: "/login",
-      element: <LoginPage />,
+      element: (
+        <GuestRoute>
+          <LoginPage />
+        </GuestRoute>
+      ),
     },
     {
       path: "/register",
-      element: <RegisterPage />,
+      element: (
+        <GuestRoute>
+          <RegisterPage />
+        </GuestRoute>
+      ),
     },
     {
       path: "/verify/return",
