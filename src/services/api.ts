@@ -64,6 +64,12 @@ export const changePasswordAPI = (
   });
 };
 
+export const outboundAuthenticateAPI = (code: string) => {
+  return axios.post<IBackendRes<IAccount>>(
+    `/api/v1/auth/outbound/authentication?code=${code}`
+  );
+};
+
 /**
  * 
 Module User

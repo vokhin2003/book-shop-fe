@@ -30,6 +30,7 @@ import {
   messaging,
   setupForegroundNotification,
 } from "@/notifications/firebase";
+import AuthenticatePage from "@/pages/auth/authenticate";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -205,6 +206,10 @@ function App() {
     {
       path: "/verify/return",
       element: <VerifyReturn />,
+    },
+    {
+      path: "/authenticate",
+      element: <AuthenticatePage />,
     },
   ]);
 

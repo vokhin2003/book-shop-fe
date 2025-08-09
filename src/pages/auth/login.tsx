@@ -1,12 +1,11 @@
 import {
-  generateToken,
   messaging,
   setupForegroundNotification,
 } from "@/notifications/firebase";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { setUserLoginInfo } from "@/redux/slice/accountSlice";
-import { fetchCart } from "@/redux/slice/cartSlice";
 import { loginAPI } from "@/services/api";
+import { GoogleOutlined } from "@ant-design/icons";
 import {
   Button,
   Divider,
@@ -39,29 +38,31 @@ const LoginPage = () => {
     (state) => state.account.isAuthenticated
   );
 
+  const handleContinueWithGoogle = () => {
+    const callbackUrl = import.meta.env.VITE_GOOGLE_REDIRECT_URI;
+    const authUrl = import.meta.env.VITE_GOOGLE_AUTH_URI;
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+    const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
+      callbackUrl
+    )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
+
+    console.log(targetUrl);
+
+    window.location.href = targetUrl;
+  };
+
   useEffect(() => {
     //đã login => redirect to '/'
     if (isAuthenticated) {
-      // navigate('/');
-      // window.location.href = "/";
       navigate(callback || "/");
     }
   }, [isAuthenticated, callback, navigate]);
 
-  //     useEffect(() => {
-  //     if (isAuthenticated) {
-  //       navigate(callback || '/');
-  //     }
-  //   }, [isAuthenticated, callback, navigate]);
-
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
-    // message.success("123456");
     const { username, password } = values;
     setIsSubmit(true);
     const res = await loginAPI(username, password);
-    // console.log(">>> check callback:", callback);
-    // console.log(res);
-    // console.log(res.data);
 
     if (res?.data) {
       console.log("success");
@@ -139,20 +140,35 @@ const LoginPage = () => {
                 <Input.Password />
               </Form.Item>
 
-              <Form.Item
-              // wrapperCol={{ offset: 6, span: 16 }}
-              >
-                <Button type="primary" htmlType="submit" loading={isSubmit}>
+              <Form.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={isSubmit}
+                  block
+                  size="large"
+                >
                   Đăng nhập
                 </Button>
               </Form.Item>
-              <Divider>Or</Divider>
-              <p className="text text-normal">
-                Chưa có tài khoản ?
-                <span>
-                  <Link to="/register"> Đăng Ký </Link>
-                </span>
-              </p>
+
+              <Form.Item>
+                <Button
+                  type="primary"
+                  block
+                  size="large"
+                  icon={<GoogleOutlined />}
+                  onClick={handleContinueWithGoogle}
+                >
+                  Tiếp Tục Với Google
+                </Button>
+              </Form.Item>
+              <Divider>Hoặc</Divider>
+              <Form.Item>
+                <Button type="primary" block size="large">
+                  <Link to="/register">Đăng Ký</Link>
+                </Button>
+              </Form.Item>
             </Form>
           </section>
         </div>

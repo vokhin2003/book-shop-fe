@@ -45,8 +45,10 @@ messaging.onBackgroundMessage((payload) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data.url; // Lấy URL từ data
-  event.waitUntil(
-    clients.openWindow(url) // Mở URL khi click
-  );
+  const url = event.notification.data?.url; // Lấy URL từ data
+  if (url) {
+    event.waitUntil(
+      clients.openWindow(url) // Mở URL khi click
+    );
+  }
 });

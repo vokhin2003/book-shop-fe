@@ -2,7 +2,16 @@ import { useState } from "react";
 import { FaReact } from "react-icons/fa";
 import { FiShoppingCart } from "react-icons/fi";
 import { VscSearchFuzzy } from "react-icons/vsc";
-import { Divider, Badge, Drawer, Avatar, Popover, Empty, message } from "antd";
+import {
+  Divider,
+  Badge,
+  Drawer,
+  Avatar,
+  Popover,
+  Empty,
+  message,
+  Image,
+} from "antd";
 import { Dropdown, Space } from "antd";
 import { useNavigate } from "react-router";
 import "styles/app.header.scss";
@@ -15,6 +24,7 @@ import { convertSlug } from "@/utils";
 import { clearCartAction } from "@/redux/slice/cartSlice";
 import ManageAccount from "./account";
 import { removeToken } from "@/notifications/firebase";
+import { UserOutlined } from "@ant-design/icons";
 
 interface IProps {
   searchTerm: string;
@@ -317,7 +327,11 @@ const Header = (props: IProps) => {
                 ) : (
                   <Dropdown menu={{ items }} trigger={["click"]}>
                     <Space>
-                      <Avatar src={user.avatar} />
+                      <Avatar
+                        key={user?.avatar} // ép remount khi URL đổi
+                        src={user?.avatar || undefined} // tránh truyền chuỗi rỗng
+                        icon={<UserOutlined />} // fallback
+                      />
                       {user?.fullName}
                     </Space>
                   </Dropdown>
