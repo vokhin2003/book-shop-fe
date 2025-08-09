@@ -70,6 +70,16 @@ export const outboundAuthenticateAPI = (code: string) => {
   );
 };
 
+export const createPasswordAPI = (
+  password: string,
+  confirmPassword: string
+) => {
+  return axios.post<IBackendRes<null>>("/api/v1/users/create-password", {
+    password,
+    confirmPassword,
+  });
+};
+
 /**
  * 
 Module User

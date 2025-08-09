@@ -57,6 +57,7 @@ interface IState {
       method: string;
       module: string;
     }[];
+    noPassword: boolean;
   };
   activeMenu: string;
 }
@@ -75,6 +76,7 @@ const initialState: IState = {
     avatar: "",
     role: "",
     permissions: [],
+    noPassword: false,
   },
 
   activeMenu: "home",
@@ -102,6 +104,7 @@ export const accountSlice = createSlice({
         avatar: "",
         role: "",
         permissions: [],
+        noPassword: false,
       };
     },
 
@@ -117,6 +120,7 @@ export const accountSlice = createSlice({
       state.user.role = action?.payload?.role;
       if (!action?.payload?.role) state.user.role = "";
       state.user.permissions = action?.payload?.permissions ?? [];
+      state.user.noPassword = action?.payload?.noPassword ?? false;
     },
 
     setRefreshTokenAction: (state, action) => {
@@ -150,6 +154,7 @@ export const accountSlice = createSlice({
         state.user.avatar = action.payload.user.avatar;
         state.user.role = action.payload.user.role || "";
         state.user.permissions = action.payload.user.permissions || [];
+        state.user.noPassword = action.payload.user.noPassword;
       }
     });
 
