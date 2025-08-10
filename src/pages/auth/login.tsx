@@ -4,7 +4,7 @@ import {
 } from "@/notifications/firebase";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { setUserLoginInfo } from "@/redux/slice/accountSlice";
-import { loginAPI } from "@/services/api";
+import { loginAPI, resendVerifyEmailAPI } from "@/services/api";
 import { GoogleOutlined } from "@ant-design/icons";
 import {
   Button,
@@ -16,7 +16,7 @@ import {
   notification,
 } from "antd";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styles from "styles/auth.module.scss";
 
 type FieldType = {
@@ -29,6 +29,9 @@ const LoginPage = () => {
   const location = useLocation();
   const dispatch = useAppDispatch();
   const [isSubmit, setIsSubmit] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [resendEmail, setResendEmail] = useState<string>("");
 
   // Lấy callback từ query parameter
   const queryParams = new URLSearchParams(location.search);
@@ -61,6 +64,7 @@ const LoginPage = () => {
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     const { username, password } = values;
+    setResendEmail(username);
     setIsSubmit(true);
     const res = await loginAPI(username, password);
 
@@ -82,17 +86,54 @@ const LoginPage = () => {
       const decodedCallback = callback ? decodeURIComponent(callback) : "/";
       navigate(decodedCallback);
     } else {
+      const errorMessage =
+        (res.message && Array.isArray(res.message)
+          ? res.message[0]
+          : res.message) || "Đăng nhập thất bại";
       notification.error({
         message: "Có lỗi xảy ra",
-        description:
-          res.message && Array.isArray(res.message)
-            ? res.message[0]
-            : res.message,
+        description: errorMessage,
         duration: 5,
       });
+      const msg = (errorMessage || "").toLowerCase();
+      if (
+        msg.includes("not verified") ||
+        msg.includes("not activated") ||
+        msg.includes("kích hoạt")
+      ) {
+        setShowResend(true);
+      } else {
+        setShowResend(false);
+      }
     }
 
     setIsSubmit(false);
+  };
+
+  const handleResendVerify = async () => {
+    if (!resendEmail) {
+      message.warning("Vui lòng nhập email trước");
+      return;
+    }
+    try {
+      setResendLoading(true);
+      const res = await resendVerifyEmailAPI(resendEmail);
+      if (res?.statusCode === 200) {
+        message.success(
+          "Đã gửi lại email xác minh. Vui lòng kiểm tra hộp thư."
+        );
+      } else {
+        notification.error({
+          message: "Gửi lại email thất bại",
+          description:
+            res?.message && Array.isArray(res.message)
+              ? res.message[0]
+              : res?.message || "",
+        });
+      }
+    } finally {
+      setResendLoading(false);
+    }
   };
 
   return (
@@ -123,7 +164,7 @@ const LoginPage = () => {
                   },
                 ]}
               >
-                <Input />
+                <Input onChange={(e) => setResendEmail(e.target.value)} />
               </Form.Item>
 
               <Form.Item<FieldType>
@@ -151,6 +192,20 @@ const LoginPage = () => {
                   Đăng nhập
                 </Button>
               </Form.Item>
+
+              {showResend && (
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    block
+                    size="large"
+                    onClick={handleResendVerify}
+                    loading={resendLoading}
+                  >
+                    Gửi lại email xác minh
+                  </Button>
+                </Form.Item>
+              )}
 
               <Form.Item>
                 <Button

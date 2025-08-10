@@ -28,6 +28,13 @@ export const loginAPI = (username: string, password: string) => {
   return axios.post<IBackendRes<IAccount>>(urlBackend, { username, password });
 };
 
+export const resendVerifyEmailAPI = (email: string) => {
+  const urlBackend = `/api/v1/auth/resend-verify?email=${encodeURIComponent(
+    email
+  )}`;
+  return axios.post<IBackendRes<null>>(urlBackend);
+};
+
 export const registerAPI = (
   fullName: string,
   email: string,
