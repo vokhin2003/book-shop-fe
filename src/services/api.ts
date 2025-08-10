@@ -87,6 +87,24 @@ export const createPasswordAPI = (
   });
 };
 
+export const forgotPasswordAPI = (email: string) => {
+  return axios.post<IBackendRes<null>>("/api/v1/auth/forgot-password", {
+    email,
+  });
+};
+
+export const resetPasswordAPI = (
+  token: string,
+  newPassword: string,
+  confirmPassword: string
+) => {
+  return axios.post<IBackendRes<null>>("/api/v1/auth/reset", {
+    token,
+    newPassword,
+    confirmPassword,
+  });
+};
+
 /**
  * 
 Module User

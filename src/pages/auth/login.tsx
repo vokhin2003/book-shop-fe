@@ -181,7 +181,11 @@ const LoginPage = () => {
                 <Input.Password />
               </Form.Item>
 
-              <Form.Item>
+              <div style={{ textAlign: "right", marginBottom: 16 }}>
+                <a onClick={() => navigate("/forgot")}>Quên mật khẩu?</a>
+              </div>
+
+              <Form.Item style={{ marginBottom: 8 }}>
                 <Button
                   type="primary"
                   htmlType="submit"

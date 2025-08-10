@@ -32,6 +32,8 @@ import {
 } from "@/notifications/firebase";
 import AuthenticatePage from "@/pages/auth/authenticate";
 import GuestRoute from "./components/share/guest-route";
+import ForgotPasswordPage from "@/pages/auth/forgot";
+import ForgotReturnPage from "@/pages/auth/forgot.return";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -220,6 +222,8 @@ function App() {
       path: "/authenticate",
       element: <AuthenticatePage />,
     },
+    { path: "/forgot", element: <ForgotPasswordPage /> },
+    { path: "/forgot/return", element: <ForgotReturnPage /> },
   ]);
 
   return (
