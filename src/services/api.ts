@@ -174,6 +174,12 @@ export const updateUserInfoAPI = (
   });
 };
 
+export const toggleAdminActiveAPI = (id: number, isAdminActive: boolean) => {
+  return axios.put<IBackendRes<IUser>>(
+    `/api/v1/admin/users/${id}/status?isAdminActive=${isAdminActive}`
+  );
+};
+
 /**
  * 
 Module Permission

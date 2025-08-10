@@ -1,16 +1,16 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { IUser } from "@/types/backend";
 import { ActionType, ProColumns } from "@ant-design/pro-components";
-import { Button, message, notification, Popconfirm, Space } from "antd";
+import { Button, message, notification, Popconfirm, Space, Switch } from "antd";
 import { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import DataTable from "@/components/client/data-table";
-import { fetchUser } from "@/redux/slice/userSlice";
+import { fetchUser, setUsers } from "@/redux/slice/userSlice";
 import { sfAnd, sfIn, sfLike } from "spring-filter-query-builder";
 import queryString from "query-string";
 import ModalUser from "@/components/admin/user/modal.user";
-import { fetchRoleAPI } from "@/services/api";
+import { fetchRoleAPI, toggleAdminActiveAPI } from "@/services/api";
 import Access from "@/components/share/access";
 import { ALL_PERMISSIONS } from "@/permission";
 
@@ -128,6 +128,57 @@ const UserPage = () => {
       render: (_value, entity) => entity.role?.name || "",
     },
 
+    {
+      title: "Active (Admin)",
+      dataIndex: "adminActive",
+      width: 120,
+      valueType: "switch",
+      render: (_v, entity) => (
+        <Access permission={ALL_PERMISSIONS.USERS.UPDATE} hideChildren>
+          <Switch
+            checked={entity.adminActive ?? true}
+            checkedChildren="On"
+            unCheckedChildren="Off"
+            onChange={async (checked) => {
+              try {
+                const res = await toggleAdminActiveAPI(entity.id, checked);
+                if (res.data && +res.statusCode === 200) {
+                  message.success("Cập nhật trạng thái thành công");
+
+                  // Cập nhật local state thay vì reload bảng
+                  // Điều này giúp tránh hiện tượng chớp nháy và giữ nguyên vị trí record
+                  const updatedUsers = users.map((user) =>
+                    user.id === entity.id
+                      ? { ...user, adminActive: checked }
+                      : user
+                  );
+
+                  // Cập nhật state users
+                  dispatch(setUsers(updatedUsers));
+
+                  // Không cần gọi reloadTable() nữa
+                  // reloadTable();
+                } else {
+                  notification.error({
+                    message: "Có lỗi xảy ra",
+                    description: res.message ?? "Không thể cập nhật trạng thái",
+                  });
+                }
+              } catch (e: any) {
+                notification.error({
+                  message: "Có lỗi xảy ra",
+                  description:
+                    e?.response?.data?.message ??
+                    e?.message ??
+                    "Lỗi không xác định",
+                });
+              }
+            }}
+          />
+        </Access>
+      ),
+      hideInSearch: true,
+    },
     {
       title: "Created At",
       dataIndex: "createdAt",

@@ -42,7 +42,7 @@ export interface IAccount {
   };
 }
 
-export interface IGetAccount extends Omit<IAccount, "access_token"> { }
+export interface IGetAccount extends Omit<IAccount, "access_token"> {}
 
 export interface IUser {
   id: number;
@@ -51,6 +51,7 @@ export interface IUser {
   phone: string;
   address: string;
   active: boolean;
+  adminActive?: boolean;
   role?: {
     id: number;
     name: string;

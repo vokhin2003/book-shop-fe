@@ -43,8 +43,9 @@ export const userSlice = createSlice({
         setActiveMenu: (state, action) => {
             // state.activeMenu = action.payload;
         },
-
-
+        setUsers: (state, action) => {
+            state.result = action.payload;
+        },
     },
     extraReducers: (builder) => {
         // Add reducers for additional action types here, and handle loading state as needed
@@ -76,6 +77,7 @@ export const userSlice = createSlice({
 
 export const {
     setActiveMenu,
+    setUsers,
 } = userSlice.actions;
 
 export default userSlice.reducer;
