@@ -17,7 +17,7 @@ import { useNavigate } from "react-router";
 import "styles/app.header.scss";
 import { isMobile } from "react-device-detect";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { logoutAPI } from "@/services/api";
 import { setLogoutAction } from "@/redux/slice/accountSlice";
 import { convertSlug } from "@/utils";
@@ -48,6 +48,7 @@ const Header = (props: IProps) => {
   //     useCurrentApp();
 
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useAppDispatch();
 
   // const [carts, setCarts] = useState<any[]>([]);
@@ -79,13 +80,13 @@ const Header = (props: IProps) => {
   const handleSearch = () => {
     const cleanSearchQuery = searchTerm
       ? searchTerm
-          .trim() // Loại bỏ khoảng trắng ở đầu và cuối
-          .replace(
-            /[^a-zA-Z0-9\s-.,:áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]/g,
-            ""
-          ) // Giữ chữ, số, dấu -.,: và ký tự tiếng Việt
-          .replace(/\s+/g, " ") // Thay thế nhiều khoảng trắng bằng một khoảng trắng
-          .trim() // Trim lại
+        .trim() // Loại bỏ khoảng trắng ở đầu và cuối
+        .replace(
+          /[^a-zA-Z0-9\s-.,:áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]/g,
+          ""
+        ) // Giữ chữ, số, dấu -.,: và ký tự tiếng Việt
+        .replace(/\s+/g, " ") // Thay thế nhiều khoảng trắng bằng một khoảng trắng
+        .trim() // Trim lại
       : "";
 
     setSearchTerm(cleanSearchQuery);
@@ -111,6 +112,8 @@ const Header = (props: IProps) => {
         setFilter(filter.replace(searchTermRegex, ""));
       }
       // Nếu không có điều kiện tìm kiếm, giữ nguyên filter
+      // Nếu đang ở landing thì đưa về shop để hiển thị danh sách trống
+      if (location.pathname !== "/shop") navigate("/shop");
       return;
     }
 
@@ -121,6 +124,7 @@ const Header = (props: IProps) => {
     if (!filter) {
       setFilter(`(title~~'${cleanSearchQuery}')`);
       setCurrent(1);
+      if (location.pathname !== "/shop") navigate("/shop");
       return;
     }
 
@@ -128,6 +132,7 @@ const Header = (props: IProps) => {
     if (filter.match(/^\(title~~'[^']*'\)$/)) {
       setFilter(`(title~~'${cleanSearchQuery}')`);
       setCurrent(1);
+      if (location.pathname !== "/shop") navigate("/shop");
       return;
     }
 
@@ -144,6 +149,7 @@ const Header = (props: IProps) => {
     // Kết hợp baseFilterQuery với điều kiện tìm kiếm mới
     setFilter(`${baseFilterQuery} and (title~~'${cleanSearchQuery}')`);
     setCurrent(1);
+    if (location.pathname !== "/shop") navigate("/shop");
   };
 
   const items = [

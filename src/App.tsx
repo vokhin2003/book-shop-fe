@@ -15,6 +15,7 @@ import PermissionPage from "./pages/admin/permission";
 import BookTab from "./pages/admin/book/book.tab";
 import ViewUpsertBook from "./components/admin/book/upsert.book";
 import HomePage from "./pages/client/home";
+import LandingPage from "./pages/client/landing";
 import LayoutClient from "./layouts/layout.client";
 import BookPage from "./pages/client/book";
 import { fetchCart } from "./redux/slice/cartSlice";
@@ -81,7 +82,8 @@ function App() {
       ),
       errorElement: <NotFound />,
       children: [
-        { index: true, element: <HomePage /> },
+        { index: true, element: <LandingPage /> },
+        { path: "shop", element: <HomePage /> },
         { path: "book/:slug", element: <BookPage /> },
         {
           path: "/order",
