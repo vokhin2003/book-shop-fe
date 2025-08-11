@@ -80,13 +80,13 @@ const Header = (props: IProps) => {
   const handleSearch = () => {
     const cleanSearchQuery = searchTerm
       ? searchTerm
-        .trim() // Loại bỏ khoảng trắng ở đầu và cuối
-        .replace(
-          /[^a-zA-Z0-9\s-.,:áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]/g,
-          ""
-        ) // Giữ chữ, số, dấu -.,: và ký tự tiếng Việt
-        .replace(/\s+/g, " ") // Thay thế nhiều khoảng trắng bằng một khoảng trắng
-        .trim() // Trim lại
+          .trim() // Loại bỏ khoảng trắng ở đầu và cuối
+          .replace(
+            /[^a-zA-Z0-9\s-.,:áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]/g,
+            ""
+          ) // Giữ chữ, số, dấu -.,: và ký tự tiếng Việt
+          .replace(/\s+/g, " ") // Thay thế nhiều khoảng trắng bằng một khoảng trắng
+          .trim() // Trim lại
       : "";
 
     setSearchTerm(cleanSearchQuery);
@@ -163,6 +163,10 @@ const Header = (props: IProps) => {
         </label>
       ),
       key: "account",
+    },
+    {
+      label: <Link to="/addresses">Địa chỉ</Link>,
+      key: "addresses",
     },
     {
       label: <Link to="/history">Lịch sử mua hàng</Link>,
