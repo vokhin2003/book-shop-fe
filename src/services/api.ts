@@ -13,6 +13,7 @@ import {
   IPaymentResult,
   IPermission,
   IRole,
+  IAddress,
   IUploadFile,
   IUser,
 } from "@/types/backend";
@@ -325,7 +326,7 @@ export const fetchBookAPI = (query: string) => {
 Module File
  */
 
-export const uploadFileAPI = (file: any, folder: string) => {
+export const uploadFileAPI = (file: File | Blob, folder: string) => {
   const bodyFormData = new FormData();
   bodyFormData.append("file", file);
   bodyFormData.append("folder", folder);
@@ -466,4 +467,48 @@ export const removeDeviceTokenAPI = (body: {
     "/api/v1/users/remove-device-token",
     body
   );
+};
+
+/**
+ * 
+ * Module Address
+ */
+
+export const fetchMyAddressesAPI = () => {
+  return axios.get<IBackendRes<IAddress[]>>("/api/v1/addresses/me");
+};
+
+export const createAddressAPI = (body: {
+  fullName: string;
+  phoneNumber: string;
+  province: string;
+  ward: string;
+  addressDetail: string;
+  addressType: "HOME" | "OFFICE";
+  is_default: boolean;
+}) => {
+  return axios.post<IBackendRes<IAddress>>("/api/v1/addresses", body);
+};
+
+export const updateAddressAPI = (
+  id: number,
+  body: {
+    fullName: string;
+    phoneNumber: string;
+    province: string;
+    ward: string;
+    addressDetail: string;
+    addressType: "HOME" | "OFFICE";
+    is_default: boolean;
+  }
+) => {
+  return axios.put<IBackendRes<IAddress>>(`/api/v1/addresses/${id}`, body);
+};
+
+export const deleteAddressAPI = (id: number) => {
+  return axios.delete<IBackendRes<null>>(`/api/v1/addresses/${id}`);
+};
+
+export const setDefaultAddressAPI = (id: number) => {
+  return axios.put<IBackendRes<IAddress>>(`/api/v1/addresses/${id}/default`);
 };

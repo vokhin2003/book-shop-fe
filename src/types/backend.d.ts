@@ -42,7 +42,7 @@ export interface IAccount {
   };
 }
 
-export interface IGetAccount extends Omit<IAccount, "access_token"> {}
+export interface IGetAccount extends Omit<IAccount, "access_token"> { }
 
 export interface IUser {
   id: number;
@@ -191,4 +191,20 @@ export enum EOrderStatus {
   SHIPPING = "SHIPPING",
   DELIVERED = "DELIVERED",
   CANCELLED = "CANCELLED",
+}
+
+// Address module
+export type TAddressType = "HOME" | "OFFICE";
+
+export interface IAddress {
+  id: number;
+  fullName: string;
+  phoneNumber: string;
+  province: string;
+  ward: string;
+  addressDetail: string;
+  addressType: TAddressType;
+  is_default: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
