@@ -259,10 +259,13 @@ const OrderPage = () => {
 
   return (
     <div>
-      <Access permission={ALL_PERMISSIONS.ORDERS.GET_PAGINATE}>
+      <Access
+        permission={ALL_PERMISSIONS.ORDERS.GET_PAGINATE}
+        showLoading={true}
+      >
         <DataTable<IOrder>
           actionRef={tableRef}
-          headerTitle="Danh sách đơn hàng"
+          headerTitle="Danh sách Orders"
           rowKey="id"
           loading={isFetching}
           columns={columns}
@@ -271,16 +274,20 @@ const OrderPage = () => {
             const query = buildQuery(params, sort, filter);
             dispatch(fetchOrder({ query }));
           }}
+          scroll={{ x: true }}
           pagination={{
             current: meta.current,
             pageSize: meta.pageSize,
             showSizeChanger: true,
             total: meta.total,
-            showTotal: (total, range) => (
-              <div>
-                {range[0]}-{range[1]} trên {total} rows
-              </div>
-            ),
+            showTotal: (total, range) => {
+              return (
+                <div>
+                  {" "}
+                  {range[0]}-{range[1]} trên {total} rows
+                </div>
+              );
+            },
           }}
           rowSelection={false}
           toolBarRender={(_action, _rows): any => {

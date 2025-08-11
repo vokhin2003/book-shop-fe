@@ -1,4 +1,4 @@
-import { Tabs, Result } from "antd";
+import { Tabs, Result, Spin } from "antd";
 import BookPage from "./book";
 import CategoryPage from "./category";
 import { ALL_PERMISSIONS } from "@/permission";
@@ -22,29 +22,45 @@ const tabConfigs = [
 
 const BookTab = () => {
   const permissions = useAppSelector((state) => state.account.user.permissions);
+  const isLoading = useAppSelector((state) => state.account.isLoading);
   const [items, setItems] = useState<
     { key: string; label: React.ReactNode; children: React.ReactNode }[]
   >([]);
 
   useEffect(() => {
-    if (permissions?.length) {
-      const filtered = tabConfigs.filter((cfg) =>
-        permissions.find(
-          (item) =>
-            item.path === cfg.permission.path &&
-            item.method === cfg.permission.method &&
-            item.module === cfg.permission.module
-        )
-      );
-      setItems(
-        filtered.map((cfg) => ({
-          key: cfg.key,
-          label: cfg.label,
-          children: cfg.children,
-        }))
-      );
+    // Chỉ filter tabs khi không còn loading và permissions đã được load
+    if (!isLoading && permissions !== undefined) {
+      if (permissions?.length) {
+        const filtered = tabConfigs.filter((cfg) =>
+          permissions.find(
+            (item) =>
+              item.path === cfg.permission.path &&
+              item.method === cfg.permission.method &&
+              item.module === cfg.permission.module
+          )
+        );
+        setItems(
+          filtered.map((cfg) => ({
+            key: cfg.key,
+            label: cfg.label,
+            children: cfg.children,
+          }))
+        );
+      } else {
+        // Nếu permissions là array rỗng, set items rỗng
+        setItems([]);
+      }
     }
-  }, [permissions]);
+  }, [permissions, isLoading]);
+
+  // Nếu đang loading, hiển thị loading
+  if (isLoading || permissions === undefined) {
+    return (
+      <div style={{ textAlign: "center", padding: "20px" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   if (!items.length) {
     // Không có quyền với cả 2 tab

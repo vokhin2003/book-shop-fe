@@ -1,10 +1,23 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { IUser } from "@/types/backend";
 import { ActionType, ProColumns } from "@ant-design/pro-components";
-import { Button, message, notification, Popconfirm, Space, Switch } from "antd";
+import {
+  Avatar,
+  Button,
+  message,
+  notification,
+  Popconfirm,
+  Space,
+  Switch,
+} from "antd";
 import { useEffect, useRef, useState } from "react";
 import dayjs from "dayjs";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import DataTable from "@/components/client/data-table";
 import { fetchUser, setUsers } from "@/redux/slice/userSlice";
 import { sfAnd, sfIn, sfLike } from "spring-filter-query-builder";
@@ -79,15 +92,37 @@ const UserPage = () => {
       hideInSearch: true,
     },
     {
-      title: "Full Name",
+      title: "User",
       dataIndex: "fullName",
-      sorter: true,
+      width: 300,
+      render: (_, record) => (
+        <Space>
+          <Avatar
+            key={record.avatar}
+            src={record.avatar || undefined}
+            icon={<UserOutlined />}
+            size={40}
+          />
+          <Space direction="vertical" size={0}>
+            <span>{record.fullName}</span>
+            <span style={{ fontSize: "12px", color: "#666" }}>
+              {record.email}
+            </span>
+          </Space>
+        </Space>
+      ),
     },
+    // {
+    //   title: "Full Name",
+    //   dataIndex: "fullName",
+    //   sorter: true,
+    // },
     {
       title: "Email",
       dataIndex: "email",
       width: 250,
       sorter: true,
+      hideInTable: true,
     },
     {
       title: "Phone",
@@ -295,7 +330,10 @@ const UserPage = () => {
 
   return (
     <div>
-      <Access permission={ALL_PERMISSIONS.USERS.GET_PAGINATE}>
+      <Access
+        permission={ALL_PERMISSIONS.USERS.GET_PAGINATE}
+        showLoading={true}
+      >
         <DataTable<IUser>
           actionRef={tableRef}
           headerTitle="Danh sách Users"

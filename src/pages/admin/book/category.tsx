@@ -188,10 +188,13 @@ const CategoryPage = () => {
 
   return (
     <div>
-      <Access permission={ALL_PERMISSIONS.CATEGORIES.GET_PAGINATE}>
+      <Access
+        permission={ALL_PERMISSIONS.CATEGORIES.GET_PAGINATE}
+        showLoading={true}
+      >
         <DataTable<ICategory>
           actionRef={tableRef}
-          headerTitle="Danh sách Category"
+          headerTitle="Danh sách Categories"
           rowKey="id"
           loading={isFetching}
           columns={columns}
@@ -200,7 +203,7 @@ const CategoryPage = () => {
             const query = buildQuery(params, sort, filter);
             dispatch(fetchCategory({ query }));
           }}
-          // scroll={{ x: true }}
+          scroll={{ x: true }}
           pagination={{
             current: meta.current,
             pageSize: meta.pageSize,

@@ -263,7 +263,10 @@ const PermissionPage = () => {
 
   return (
     <div>
-      <Access permission={ALL_PERMISSIONS.PERMISSIONS.GET_PAGINATE}>
+      <Access
+        permission={ALL_PERMISSIONS.PERMISSIONS.GET_PAGINATE}
+        showLoading={true}
+      >
         <DataTable<IPermission>
           actionRef={tableRef}
           headerTitle="Danh sách Permissions (Quyền Hạn)"

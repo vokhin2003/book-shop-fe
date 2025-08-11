@@ -336,7 +336,10 @@ const BookPage = () => {
 
   return (
     <div>
-      <Access permission={ALL_PERMISSIONS.BOOKS.GET_PAGINATE}>
+      <Access
+        permission={ALL_PERMISSIONS.BOOKS.GET_PAGINATE}
+        showLoading={true}
+      >
         <DataTable<IBook>
           actionRef={tableRef}
           headerTitle="Danh sách Books"

@@ -204,7 +204,10 @@ const RolePage = () => {
 
   return (
     <div>
-      <Access permission={ALL_PERMISSIONS.ROLES.GET_PAGINATE}>
+      <Access
+        permission={ALL_PERMISSIONS.ROLES.GET_PAGINATE}
+        showLoading={true}
+      >
         <DataTable<IRole>
           actionRef={tableRef}
           headerTitle="Danh sách Roles (Vai Trò)"
