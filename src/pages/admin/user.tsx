@@ -35,7 +35,7 @@ interface IRoleSelect {
 const UserPage = () => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [dataInit, setDataInit] = useState<IUser | null>(null);
-  const [openViewDetail, setOpenViewDetail] = useState<boolean>(false);
+  // const [openViewDetail, setOpenViewDetail] = useState<boolean>(false);
   const [roleList, setRoleList] = useState<IRoleSelect[]>([]);
 
   const tableRef = useRef<ActionType>();
@@ -92,7 +92,7 @@ const UserPage = () => {
       hideInSearch: true,
     },
     {
-      title: "User",
+      title: "Người dùng",
       dataIndex: "fullName",
       width: 300,
       render: (_, record) => (
@@ -125,7 +125,7 @@ const UserPage = () => {
       hideInTable: true,
     },
     {
-      title: "Phone",
+      title: "Số điện thoại",
       dataIndex: "phone",
       // sorter: true,
       hideInSearch: true,
@@ -149,7 +149,7 @@ const UserPage = () => {
     // },
 
     {
-      title: "Role",
+      title: "Vai trò",
       dataIndex: "roleIds",
       valueType: "select",
       fieldProps: {
@@ -164,7 +164,7 @@ const UserPage = () => {
     },
 
     {
-      title: "Active (Admin)",
+      title: "Kích hoạt (Admin)",
       dataIndex: "adminActive",
       width: 120,
       valueType: "switch",
@@ -215,7 +215,7 @@ const UserPage = () => {
       hideInSearch: true,
     },
     {
-      title: "Created At",
+      title: "Ngày tạo",
       dataIndex: "createdAt",
       width: 200,
       sorter: true,
@@ -231,7 +231,7 @@ const UserPage = () => {
       hideInSearch: true,
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       hideInSearch: true,
       width: 50,
       render: (_value, entity, _index, _action) => (
@@ -336,7 +336,7 @@ const UserPage = () => {
       >
         <DataTable<IUser>
           actionRef={tableRef}
-          headerTitle="Danh sách Users"
+          headerTitle="Danh sách người dùng"
           rowKey="id"
           loading={isFetching}
           columns={columns}

@@ -18,7 +18,7 @@ import { sfAnd, sfIn, sfLike } from "spring-filter-query-builder";
 const PermissionPage = () => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [dataInit, setDataInit] = useState<IPermission | null>(null);
-  const [openViewDetail, setOpenViewDetail] = useState<boolean>(false);
+  // const [openViewDetail, setOpenViewDetail] = useState<boolean>(false);
 
   const tableRef = useRef<ActionType>();
 
@@ -48,16 +48,16 @@ const PermissionPage = () => {
 
   const columns: ProColumns<IPermission>[] = [
     {
-      title: "Id",
+      title: "Mã",
       dataIndex: "id",
       align: "center",
       width: 70,
-      render: (text, record, index, action) => {
+      render: (_text, record) => {
         return (
           <a
             href="#"
             onClick={() => {
-              setOpenViewDetail(true);
+              // setOpenViewDetail(true);
               setDataInit(record);
             }}
           >
@@ -68,12 +68,12 @@ const PermissionPage = () => {
       hideInSearch: true,
     },
     {
-      title: "Name",
+      title: "Tên quyền",
       dataIndex: "name",
       sorter: true,
     },
     {
-      title: "API",
+      title: "Đường dẫn",
       dataIndex: "path",
       sorter: true,
     },
@@ -97,7 +97,7 @@ const PermissionPage = () => {
     //     },
     // },
     {
-      title: "Method",
+      title: "Phương thức",
       dataIndex: "method",
       sorter: true,
       // align: "center",
@@ -113,7 +113,7 @@ const PermissionPage = () => {
         DELETE: { text: "DELETE" },
         PATCH: { text: "PATCH" },
       },
-      render: (dom, entity, index, action, schema) => {
+      render: (_dom, entity) => {
         return (
           <p
             style={{
@@ -134,11 +134,11 @@ const PermissionPage = () => {
       sorter: true,
     },
     {
-      title: "CreatedAt",
+      title: "Ngày tạo",
       dataIndex: "createdAt",
       width: 200,
       sorter: true,
-      render: (text, record, index, action) => {
+      render: (_text, record) => {
         return (
           <>
             {record.createdAt
@@ -150,11 +150,11 @@ const PermissionPage = () => {
       hideInSearch: true,
     },
     {
-      title: "UpdatedAt",
+      title: "Ngày cập nhật",
       dataIndex: "updatedAt",
       width: 200,
       sorter: true,
-      render: (text, record, index, action) => {
+      render: (_text, record) => {
         return (
           <>
             {record.updatedAt
@@ -166,10 +166,10 @@ const PermissionPage = () => {
       hideInSearch: true,
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       hideInSearch: true,
       width: 50,
-      render: (_value, entity, _index, _action) => (
+      render: (_value, entity) => (
         <Space>
           <Access permission={ALL_PERMISSIONS.PERMISSIONS.UPDATE} hideChildren>
             <EditOutlined
@@ -269,7 +269,7 @@ const PermissionPage = () => {
       >
         <DataTable<IPermission>
           actionRef={tableRef}
-          headerTitle="Danh sách Permissions (Quyền Hạn)"
+          headerTitle="Danh sách quyền hạn"
           rowKey="id"
           loading={isFetching}
           columns={columns}

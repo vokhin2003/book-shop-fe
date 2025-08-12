@@ -56,7 +56,7 @@ const CategoryPage = () => {
       hideInSearch: true,
     },
     {
-      title: "Name",
+      title: "Danh mục",
       dataIndex: "name",
       sorter: true,
       ellipsis: true,
@@ -75,7 +75,7 @@ const CategoryPage = () => {
     //     hideInSearch: true,
     // },
     {
-      title: "Description",
+      title: "Mô tả",
       dataIndex: "description",
       hideInSearch: true,
       width: 350,
@@ -83,42 +83,38 @@ const CategoryPage = () => {
     },
 
     {
-      title: "CreatedAt",
+      title: "Ngày tạo",
       dataIndex: "createdAt",
       width: 200,
       sorter: true,
-      render: (text, record, index, action) => {
-        return (
-          <>
-            {record.createdAt
-              ? dayjs(record.createdAt).format("DD-MM-YYYY HH:mm:ss")
-              : ""}
-          </>
-        );
-      },
+      render: (_text, record: ICategory) => (
+        <>
+          {record.createdAt
+            ? dayjs(record.createdAt).format("DD-MM-YYYY HH:mm:ss")
+            : ""}
+        </>
+      ),
       hideInSearch: true,
     },
     {
-      title: "UpdatedAt",
+      title: "Ngày cập nhật",
       dataIndex: "updatedAt",
       width: 200,
       sorter: true,
-      render: (text, record, index, action) => {
-        return (
-          <>
-            {record.updatedAt
-              ? dayjs(record.updatedAt).format("DD-MM-YYYY HH:mm:ss")
-              : ""}
-          </>
-        );
-      },
+      render: (_text, record: ICategory) => (
+        <>
+          {record.updatedAt
+            ? dayjs(record.updatedAt).format("DD-MM-YYYY HH:mm:ss")
+            : ""}
+        </>
+      ),
       hideInSearch: true,
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       hideInSearch: true,
       width: 100,
-      render: (_value, entity, _index, _action) => (
+      render: (_value, entity) => (
         <Space>
           <Access permission={ALL_PERMISSIONS.CATEGORIES.UPDATE} hideChildren>
             <EditOutlined
@@ -158,10 +154,14 @@ const CategoryPage = () => {
     },
   ];
 
-  const buildQuery = (params: any, sort: any, filter: any) => {
-    const q: any = {
-      page: params.current,
-      size: params.pageSize,
+  const buildQuery = (
+    params: { current?: number; pageSize?: number; name?: string },
+    sort: Record<string, string>,
+    _filter: unknown
+  ) => {
+    const q: { page: number; size: number; filter?: string } = {
+      page: params.current ?? 1,
+      size: params.pageSize ?? 10,
       filter: "",
     };
 
@@ -170,7 +170,7 @@ const CategoryPage = () => {
     if (params.name) q.filter = `${sfLike("name", params.name)}`;
     if (!q.filter) delete q.filter;
 
-    const query = queryString.stringify(q);
+    const query = queryString.stringify(q as Record<string, unknown>);
 
     let sortQuery = "";
     if (sort) {
@@ -194,7 +194,7 @@ const CategoryPage = () => {
       >
         <DataTable<ICategory>
           actionRef={tableRef}
-          headerTitle="Danh sách Categories"
+          headerTitle="Danh sách danh mục"
           rowKey="id"
           loading={isFetching}
           columns={columns}

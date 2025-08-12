@@ -174,7 +174,7 @@ const OrderPage = () => {
     //     hideInSearch: true,
     // },
     {
-      title: "Actions",
+      title: "Thao tác",
       hideInSearch: true,
       width: 50,
       render: (_value, entity) => (
@@ -265,7 +265,7 @@ const OrderPage = () => {
       >
         <DataTable<IOrder>
           actionRef={tableRef}
-          headerTitle="Danh sách Orders"
+          headerTitle="Danh sách đơn hàng"
           rowKey="id"
           loading={isFetching}
           columns={columns}

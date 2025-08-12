@@ -7,12 +7,8 @@ import { fetchCategoryAPI } from "@/services/api";
 import { processDateRangeFilter } from "@/services/helper";
 import { IBook } from "@/types/backend";
 import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
-import {
-  ActionType,
-  ProColumns,
-  ProFormSelect,
-} from "@ant-design/pro-components";
-import { Button, Popconfirm, Space, Tag } from "antd";
+import { ActionType, ProColumns } from "@ant-design/pro-components";
+import { Button, Popconfirm, Space } from "antd";
 import dayjs from "dayjs";
 import queryString from "query-string";
 import { useEffect, useRef, useState } from "react";
@@ -342,7 +338,7 @@ const BookPage = () => {
       >
         <DataTable<IBook>
           actionRef={tableRef}
-          headerTitle="Danh sách Books"
+          headerTitle="Danh sách sách"
           rowKey="id"
           loading={isFetching}
           columns={columns}

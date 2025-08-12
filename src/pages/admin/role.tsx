@@ -68,16 +68,16 @@ const RolePage = () => {
 
   const columns: ProColumns<IRole>[] = [
     {
-      title: "Id",
+      title: "Mã",
       dataIndex: "id",
       width: 200,
-      render: (text, record, index, action) => {
+      render: (_text, record) => {
         return <span>{record.id}</span>;
       },
       hideInSearch: true,
     },
     {
-      title: "Name",
+      title: "Tên vai trò",
       dataIndex: "name",
       sorter: true,
     },
@@ -85,7 +85,7 @@ const RolePage = () => {
     {
       title: "Trạng thái",
       // dataIndex: 'active',
-      render(dom, entity, index, action, schema) {
+      render(_dom, _entity) {
         return (
           <>
             <Tag color={"lime"}>ACTIVE</Tag>
@@ -95,11 +95,11 @@ const RolePage = () => {
       hideInSearch: true,
     },
     {
-      title: "CreatedAt",
+      title: "Ngày tạo",
       dataIndex: "createdAt",
       width: 200,
       sorter: true,
-      render: (text, record, index, action) => {
+      render: (_text, record) => {
         return (
           <>
             {record.createdAt
@@ -111,11 +111,11 @@ const RolePage = () => {
       hideInSearch: true,
     },
     {
-      title: "UpdatedAt",
+      title: "Ngày cập nhật",
       dataIndex: "updatedAt",
       width: 200,
       sorter: true,
-      render: (text, record, index, action) => {
+      render: (_text, record) => {
         return (
           <>
             {record.updatedAt
@@ -127,7 +127,7 @@ const RolePage = () => {
       hideInSearch: true,
     },
     {
-      title: "Actions",
+      title: "Thao tác",
       hideInSearch: true,
       width: 50,
       render: (_value, entity, _index, _action) => (
@@ -169,11 +169,15 @@ const RolePage = () => {
     },
   ];
 
-  const buildQuery = (params: any, sort: any, filter: any) => {
+  const buildQuery = (
+    params: { current?: number; pageSize?: number; name?: string },
+    sort: Record<string, string>,
+    _filter: unknown
+  ) => {
     // const clone = { ...params };
-    const q: any = {
-      page: params.current,
-      size: params.pageSize,
+    const q: { page: number; size: number; filter?: string } = {
+      page: params.current ?? 1,
+      size: params.pageSize ?? 10,
       filter: "",
     };
 
@@ -186,7 +190,7 @@ const RolePage = () => {
     q.filter = filters.length > 0 ? sfAnd(filters).toString() : "";
 
     if (!q.filter) delete q.filter;
-    const query = queryString.stringify(q);
+    const query = queryString.stringify(q as Record<string, unknown>);
 
     let sortQuery = "";
     if (sort) {
@@ -210,7 +214,7 @@ const RolePage = () => {
       >
         <DataTable<IRole>
           actionRef={tableRef}
-          headerTitle="Danh sách Roles (Vai Trò)"
+          headerTitle="Danh sách vai trò"
           rowKey="id"
           loading={isFetching}
           columns={columns}
