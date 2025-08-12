@@ -1,6 +1,6 @@
 import { Breadcrumb, Button, Result, Steps } from "antd";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "styles/client.order.scss";
 import { isMobile } from "react-device-detect";
 import OrderDetail from "@/components/client/order";
@@ -8,12 +8,28 @@ import Payment from "@/components/client/order/payment";
 
 const OrderPage = () => {
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [selectedBookIds, setSelectedBookIds] = useState<number[]>([]);
+  const location = useLocation();
+
+  // Initialize selection from navigation state
+  useEffect(() => {
+    const state = location.state as {
+      defaultSelectedBookIds?: number[];
+    } | null;
+    if (state?.defaultSelectedBookIds) {
+      setSelectedBookIds(state.defaultSelectedBookIds);
+    } else {
+      setSelectedBookIds([]);
+    }
+    // Clear state after using it to avoid reusing on back navigation
+    window.history.replaceState({}, document.title);
+  }, [location.state]);
 
   return (
     <div style={{ background: "#efefef", padding: "20px 0" }}>
       <div
         className="order-container"
-        style={{ maxWidth: 1440, margin: "0 auto", overflow: "hidden" }}
+        style={{ maxWidth: 1200, margin: "0 auto", overflow: "hidden" }}
       >
         <div
           style={{
@@ -59,8 +75,20 @@ const OrderPage = () => {
           </div>
         )}
 
-        {currentStep === 0 && <OrderDetail setCurrentStep={setCurrentStep} />}
-        {currentStep === 1 && <Payment setCurrentStep={setCurrentStep} />}
+        {currentStep === 0 && (
+          <OrderDetail
+            setCurrentStep={setCurrentStep}
+            selectedBookIds={selectedBookIds}
+            setSelectedBookIds={setSelectedBookIds}
+          />
+        )}
+        {currentStep === 1 && (
+          <Payment
+            setCurrentStep={setCurrentStep}
+            selectedBookIds={selectedBookIds}
+            setSelectedBookIds={setSelectedBookIds}
+          />
+        )}
         {currentStep === 2 && (
           <Result
             status={"success"}

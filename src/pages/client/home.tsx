@@ -81,6 +81,15 @@ const HomePage = () => {
   ];
 
   useEffect(() => {
+    // Reset form and filter if entering /shop without category query from elsewhere
+    const paramsOnEnter = new URLSearchParams(window.location.search);
+    const cateOnEnter = paramsOnEnter.get("category");
+    if (!cateOnEnter) {
+      form.resetFields();
+      setFilter("");
+      setCurrent(1);
+    }
+
     const fetchCategory = async () => {
       const res = await fetchCategoryAPI("page=1&size=100");
       if (res.data) {
@@ -95,6 +104,8 @@ const HomePage = () => {
         if (cateId) {
           form.setFieldsValue({ category: [Number(cateId)] });
           setFilter(`(category.id:'${cateId}')`);
+        } else {
+          setFilter("");
         }
       }
     };

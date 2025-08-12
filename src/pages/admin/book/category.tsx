@@ -61,6 +61,7 @@ const CategoryPage = () => {
       sorter: true,
       ellipsis: true,
       copyable: true,
+      width: 220,
     },
 
     // {
@@ -80,12 +81,13 @@ const CategoryPage = () => {
       hideInSearch: true,
       width: 350,
       ellipsis: true,
+      copyable: true,
     },
 
     {
       title: "Ngày tạo",
       dataIndex: "createdAt",
-      width: 200,
+      width: 180,
       sorter: true,
       render: (_text, record: ICategory) => (
         <>
@@ -99,7 +101,7 @@ const CategoryPage = () => {
     {
       title: "Ngày cập nhật",
       dataIndex: "updatedAt",
-      width: 200,
+      width: 180,
       sorter: true,
       render: (_text, record: ICategory) => (
         <>
@@ -203,7 +205,7 @@ const CategoryPage = () => {
             const query = buildQuery(params, sort, filter);
             dispatch(fetchCategory({ query }));
           }}
-          scroll={{ x: true }}
+          // scroll={{ x: true }}
           pagination={{
             current: meta.current,
             pageSize: meta.pageSize,

@@ -372,6 +372,12 @@ export const fetchCartAPI = () => {
   return axios.get<IBackendRes<ICartItem[]>>("/api/v1/carts");
 };
 
+export const bulkRemoveFromCartAPI = (bookIds: number[]) => {
+  return axios.delete<IBackendRes<null>>("/api/v1/carts/bulk", {
+    data: { bookIds },
+  });
+};
+
 /**
  * 
 Module Order Admin

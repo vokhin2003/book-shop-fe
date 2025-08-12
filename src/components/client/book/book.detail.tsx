@@ -258,8 +258,10 @@ const BookDetail = (props: IProps) => {
 
     try {
       await dispatch(addToCart({ bookId: book.id, quantity })).unwrap();
-      // message.success("Sản phẩm đã được thêm vào giỏ hàng");
-      navigate("/order");
+      // Điều hướng sang trang order và chỉ chọn đúng sách này
+      navigate("/order", {
+        state: { defaultSelectedBookIds: [book.id] },
+      });
     } catch (error) {
       // console.log(">>> check error when add to cart:", error);
       notification.error({

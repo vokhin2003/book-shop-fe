@@ -4,6 +4,7 @@ import {
   fetchCartAPI,
   removeFromCartAPI,
   updateCartAPI,
+  bulkRemoveFromCartAPI,
 } from "@/services/api";
 import { ICartItem } from "@/types/backend";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -93,6 +94,23 @@ export const clearCart = createAsyncThunk(
       }
       return rejectWithValue(res.message || "Không thể xóa giỏ hàng");
     } catch (error) {
+      return rejectWithValue(error.message || "Lỗi không xác định");
+    }
+  }
+);
+
+export const removeSelectedFromCart = createAsyncThunk(
+  "cart/removeSelectedFromCart",
+  async (bookIds: number[], { rejectWithValue }) => {
+    try {
+      const res = await bulkRemoveFromCartAPI(bookIds);
+      if (res.statusCode === 200) {
+        return bookIds;
+      }
+      return rejectWithValue(
+        res.message || "Không thể xóa các sản phẩm đã chọn"
+      );
+    } catch (error: any) {
       return rejectWithValue(error.message || "Lỗi không xác định");
     }
   }
@@ -230,6 +248,11 @@ export const cartSlice = createSlice({
       .addCase(clearCart.fulfilled, (state) => {
         cartSlice.caseReducers.clearCartAction(state);
       });
+
+    builder.addCase(removeSelectedFromCart.fulfilled, (state, action) => {
+      const ids = action.payload as number[];
+      state.items = state.items.filter((i) => !ids.includes(i.book.id));
+    });
   },
 });
 

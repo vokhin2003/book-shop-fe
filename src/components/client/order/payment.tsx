@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { clearCart } from "@/redux/slice/cartSlice";
+// import { clearCart } from "@/redux/slice/cartSlice";
 import {
   createAddressAPI,
   createPaymentUrlAPI,
@@ -41,10 +41,12 @@ type FieldType = {
 
 interface IProps {
   setCurrentStep: (step: number) => void;
+  selectedBookIds: number[];
+  setSelectedBookIds: (ids: number[]) => void;
 }
 
 const Payment = (props: IProps) => {
-  const { setCurrentStep } = props;
+  const { setCurrentStep, selectedBookIds, setSelectedBookIds } = props;
   // const { carts, user, setCarts } = useCurrentApp();
 
   const carts = useAppSelector((state) => state.cart.items);
@@ -89,16 +91,19 @@ const Payment = (props: IProps) => {
 
   useEffect(() => {
     if (carts?.length > 0) {
-      let sum = 0;
-      carts.map((item) => {
-        sum +=
-          item.quantity * (item.book.price * (1 - item.book.discount / 100));
-      });
+      const sum = carts
+        .filter((ci) => selectedBookIds.includes(ci.book.id))
+        .reduce((acc, item) => {
+          return (
+            acc +
+            item.quantity * (item.book.price * (1 - item.book.discount / 100))
+          );
+        }, 0);
       setTotalPrice(sum);
     } else {
       setTotalPrice(0);
     }
-  }, [carts]);
+  }, [carts, selectedBookIds]);
 
   useEffect(() => {
     if (user) {
@@ -146,15 +151,20 @@ const Payment = (props: IProps) => {
     fetchAddresses();
   }, []);
 
-  const handleRemoveBook = (id?: number) => {
-    void id; // keep signature compatible and avoid unused-var lint
-    // const cartStorage = localStorage.getItem("carts");
-    // if (cartStorage) {
-    //     const carts = JSON.parse(cartStorage) as ICart[];
-    //     const newCarts = carts.filter((item) => item._id !== _id);
-    //     localStorage.setItem("carts", JSON.stringify(newCarts));
-    //     setCarts(newCarts);
-    // }
+  const handleRemoveBook = async (bookId?: number) => {
+    if (!bookId) return;
+    try {
+      const m = await import("@/redux/slice/cartSlice");
+      await dispatch(m.removeFromCart(bookId)).unwrap();
+      // ensure selected ids stay in sync
+      setSelectedBookIds(selectedBookIds.filter((id) => id !== bookId));
+      message.success("Sản phẩm đã được xoá khỏi giỏ hàng");
+    } catch (error) {
+      notification.error({
+        message: "Đã có lỗi xảy ra",
+        description: (error as unknown as string) || "",
+      });
+    }
   };
 
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
@@ -163,10 +173,16 @@ const Payment = (props: IProps) => {
       message.error("Vui lòng chọn địa chỉ nhận hàng");
       return;
     }
-    const items = carts.map((item) => ({
-      bookId: item.book.id,
-      quantity: item.quantity,
-    }));
+    const items = carts
+      .filter((ci) => selectedBookIds.includes(ci.book.id))
+      .map((item) => ({
+        bookId: item.book.id,
+        quantity: item.quantity,
+      }));
+    if (items.length === 0) {
+      message.error("Vui lòng chọn sản phẩm để đặt hàng");
+      return;
+    }
 
     const submitData: ICreateOrderRequest = {
       fullName: selectedAddress.fullName,
@@ -187,11 +203,31 @@ const Payment = (props: IProps) => {
       const order = orderRes.data;
       if (values.paymentMethod === "COD") {
         // Với COD, chuyển sang bước hoàn tất
-        dispatch(clearCart());
+        // Remove only selected items
+        try {
+          const ids = selectedBookIds;
+          if (ids.length > 0) {
+            await import("@/redux/slice/cartSlice").then(async (m) => {
+              await dispatch(m.removeSelectedFromCart(ids)).unwrap();
+            });
+          }
+        } catch {
+          // ignore cleanup error
+        }
         message.success("Đặt hàng thành công!");
         setCurrentStep(2);
       } else if (values.paymentMethod === "VNPAY") {
-        dispatch(clearCart());
+        // VNPay: also remove selected items right before redirecting
+        try {
+          const ids = selectedBookIds;
+          if (ids.length > 0) {
+            await import("@/redux/slice/cartSlice").then(async (m) => {
+              await dispatch(m.removeSelectedFromCart(ids)).unwrap();
+            });
+          }
+        } catch {
+          // ignore cleanup error
+        }
         // Với VNPay, gọi API lấy paymentUrl
         const paymentData = {
           orderId: order.id,
@@ -323,7 +359,10 @@ const Payment = (props: IProps) => {
               {selectedAddress.is_default && (
                 <Tag
                   color="red"
-                  style={{ borderRadius: 4, marginLeft: "16px" }}
+                  style={{
+                    borderRadius: 4,
+                    marginLeft: "16px",
+                  }}
                 >
                   Mặc định
                 </Tag>
@@ -351,108 +390,116 @@ const Payment = (props: IProps) => {
       </div>
 
       <Row gutter={20}>
-        <Col md={16} xs={24}>
-          {carts?.map((item, index) => {
-            const currentBookPrice =
-              item.book.price * (1 - item.book.discount / 100);
+        <Col md={18} xs={24}>
+          {carts
+            ?.filter((ci) => selectedBookIds.includes(ci.book.id))
+            .map((item, index) => {
+              const currentBookPrice =
+                item.book.price * (1 - item.book.discount / 100);
 
-            // const currentBookPrice =
-            // item.book.price * (1 - item.book.discount / 100);
-            // const originalPrice = item.book.price;
-            // const hasDiscount = item.book.discount > 0;
-            return (
-              <div
-                className="order-book"
-                key={`index-${index}`}
-                style={isMobile ? { flexDirection: "column" } : {}}
-              >
-                {!isMobile ? (
-                  <>
-                    <div className="book-image">
-                      <img src={item.book.thumbnail} alt={item.book.title} />
-                    </div>
-                    <div className="book-info">
-                      <div className="book-title">{item.book.title}</div>
-                      <div className="book-category">
-                        Thể loại: {item.book.category?.name || "Không xác định"}
+              // const currentBookPrice =
+              // item.book.price * (1 - item.book.discount / 100);
+              // const originalPrice = item.book.price;
+              // const hasDiscount = item.book.discount > 0;
+              return (
+                <div
+                  className="order-book"
+                  key={`index-${index}`}
+                  style={isMobile ? { flexDirection: "column" } : {}}
+                >
+                  {!isMobile ? (
+                    <>
+                      <div className="book-image">
+                        <img src={item.book.thumbnail} alt={item.book.title} />
                       </div>
-                      {/* <div className="book-stock">
+                      <div className="book-info">
+                        <div className="book-title">{item.book.title}</div>
+                        <div className="book-category">
+                          Thể loại:{" "}
+                          {item.book.category?.name || "Không xác định"}
+                        </div>
+                        {/* <div className="book-stock">
                                     {item.book.quantity > 0
                                         ? `Còn ${item.book.quantity} sản phẩm`
                                         : "Hết hàng"}
                                 </div> */}
-                    </div>
+                      </div>
 
-                    <div className="book-price">
-                      {/* {hasDiscount && (
-                                            <span className="original-price">
-                                                {new Intl.NumberFormat(
-                                                    "vi-VN",
-                                                    {
-                                                        style: "currency",
-                                                        currency: "VND",
-                                                    }
-                                                ).format(originalPrice)}
-                                            </span>
-                                        )} */}
+                      <div className="book-price">
+                        {item.book.discount > 0 && (
+                          <span className="original-price">
+                            {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(item.book.price)}
+                          </span>
+                        )}
+                        <span className="current-price">
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(currentBookPrice)}
+                        </span>
+                      </div>
 
-                      <span className="current-price">
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(currentBookPrice)}
-                      </span>
-                    </div>
-
-                    <div className="book-quantity">
-                      <div className="quantity">Số lượng: {item.quantity}</div>
-                    </div>
-
-                    <div className="book-actions">
-                      <DeleteTwoTone
-                        style={{
-                          cursor: "pointer",
-                          fontSize: "16px",
-                        }}
-                        onClick={() => handleRemoveBook(item.book.id)}
-                        twoToneColor="#ff4d4f"
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>{item.book.title}</div>
-                    <div className="book-content" style={{ width: "100%" }}>
-                      <img src={item.book.thumbnail} />
-                      <div className="action">
+                      <div className="book-quantity">
                         <div className="quantity">
                           Số lượng: {item.quantity}
                         </div>
+                      </div>
+
+                      <div className="book-total">
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(currentBookPrice * item.quantity)}
+                      </div>
+
+                      <div className="book-actions">
                         <DeleteTwoTone
                           style={{
                             cursor: "pointer",
+                            fontSize: "16px",
                           }}
-                          onClick={() => handleRemoveBook(item.id)}
-                          twoToneColor="#eb2f96"
+                          onClick={() => handleRemoveBook(item.book.id)}
+                          twoToneColor="#ff4d4f"
                         />
                       </div>
-                    </div>
-                    <div className="sum">
-                      Tổng:{" "}
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(currentBookPrice * item.quantity)}
-                    </div>
-                  </>
-                )}
-              </div>
-            );
-          })}
+                    </>
+                  ) : (
+                    <>
+                      <div>{item.book.title}</div>
+                      <div className="book-content" style={{ width: "100%" }}>
+                        <img src={item.book.thumbnail} />
+                        <div className="action">
+                          <div className="quantity">
+                            Số lượng: {item.quantity}
+                          </div>
+                          <DeleteTwoTone
+                            style={{
+                              cursor: "pointer",
+                            }}
+                            onClick={() => handleRemoveBook(item.book.id)}
+                            twoToneColor="#eb2f96"
+                          />
+                        </div>
+                      </div>
+                      <div className="sum">
+                        Tổng:{" "}
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(currentBookPrice * item.quantity)}
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           {/* Back link now shown in page header next to breadcrumb */}
         </Col>
 
-        <Col md={8} xs={24}>
+        <Col md={6} xs={24}>
           <div className="order-sum">
             <Form
               form={form}
@@ -461,7 +508,7 @@ const Payment = (props: IProps) => {
               autoComplete="off"
               layout="vertical"
             >
-              <div className="order-sum">
+              <div>
                 <Form.Item<FieldType>
                   label="Hình thức thanh toán"
                   name="paymentMethod"
@@ -500,7 +547,12 @@ const Payment = (props: IProps) => {
                       <LoadingOutlined /> &nbsp;
                     </span>
                   )}
-                  Đặt Hàng ({carts?.length ?? 0})
+                  {(() => {
+                    const count = carts.filter((ci) =>
+                      selectedBookIds.includes(ci.book.id)
+                    ).length;
+                    return `Đặt Hàng (${count})`;
+                  })()}
                 </button>
 
                 {/* <Button
