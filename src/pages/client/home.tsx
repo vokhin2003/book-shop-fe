@@ -28,11 +28,20 @@ type FieldType = {
   };
 };
 
+type OutletContextType = {
+  searchTerm: string;
+  filter: string;
+  setFilter: (val: string) => void;
+  setSearchTerm: (val: string) => void;
+  current: number;
+  setCurrent: (val: number) => void;
+};
+
 const HomePage = () => {
   const { searchTerm, filter, setFilter, setSearchTerm, current, setCurrent } =
-    useOutletContext() as any;
+    useOutletContext<OutletContextType>();
 
-  const [showMobileFilter, setShowMobileFilter] = useState<boolean>(false);
+  const [, setShowMobileFilter] = useState<boolean>(false);
 
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -138,7 +147,10 @@ const HomePage = () => {
     }
   };
 
-  const handleChangeFilter = (changedValues: any, values: any) => {
+  const handleChangeFilter = (
+    changedValues: Partial<FieldType>,
+    values: FieldType
+  ) => {
     // console.log(">>> check handleChangeFilter:", changedValues, values);
     // if (
     //     changedValues?.category === undefined &&
@@ -149,7 +161,7 @@ const HomePage = () => {
     if (changedValues?.category === undefined) return;
 
     let q = "";
-    const cate = values.category;
+    const cate = values.category ?? [];
 
     if (cate.length > 0) {
       cate.map((item, index) => {
@@ -161,15 +173,17 @@ const HomePage = () => {
     }
 
     let priceQuery = "";
-    if (values?.range?.from > 0) {
-      priceQuery += `price>:${values.range.from}`;
+    const fromVal = values.range?.from;
+    const toVal = values.range?.to;
+    if (typeof fromVal === "number" && fromVal > 0) {
+      priceQuery += `price>:${fromVal}`;
     }
 
-    if (values?.range?.to > 0) {
+    if (typeof toVal === "number" && toVal > 0) {
       if (priceQuery) {
-        priceQuery += ` and price<:${values.range.to}`;
+        priceQuery += ` and price<:${toVal}`;
       } else {
-        priceQuery += `price<:${values.range.to}`;
+        priceQuery += `price<:${toVal}`;
       }
     }
 
@@ -255,18 +269,25 @@ const HomePage = () => {
     navigate(`/book/${slug}?id=${book.id}`);
   };
 
+  const formatCurrency = (amount?: number) =>
+    new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount || 0);
+
   return (
     <>
       <div style={{ background: "#efefef", padding: "20px 0" }}>
         <div
           className="homepage-container"
-          style={{ maxWidth: 1440, margin: "0 auto" }}
+          style={{ maxWidth: 1200, margin: "0 auto" }}
         >
           <Row gutter={20}>
-            <Col md={4} sm={0} xs={0}>
+            <Col md={5} sm={0} xs={0}>
               <div
+                className="filter-card"
                 style={{
-                  padding: "20px",
+                  padding: "14px",
                   background: "#fff",
                   borderRadius: 5,
                 }}
@@ -333,6 +354,7 @@ const HomePage = () => {
                             name="from"
                             min={0}
                             placeholder="đ TỪ"
+                            className="small-input"
                             formatter={(value) =>
                               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                             }
@@ -352,6 +374,7 @@ const HomePage = () => {
                             name="to"
                             min={0}
                             placeholder="đ ĐẾN"
+                            className="small-input"
                             formatter={(value) =>
                               `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                             }
@@ -374,7 +397,7 @@ const HomePage = () => {
                   </Form.Item>
                   <Divider />
                   <Form.Item label="Đánh giá" labelCol={{ span: 24 }}>
-                    <div>
+                    <div className="rating-row">
                       <Rate
                         value={5}
                         disabled
@@ -385,7 +408,7 @@ const HomePage = () => {
                       />
                       <span className="ant-rate-text"></span>
                     </div>
-                    <div>
+                    <div className="rating-row">
                       <Rate
                         value={4}
                         disabled
@@ -396,7 +419,7 @@ const HomePage = () => {
                       />
                       <span className="ant-rate-text">trở lên</span>
                     </div>
-                    <div>
+                    <div className="rating-row">
                       <Rate
                         value={3}
                         disabled
@@ -407,7 +430,7 @@ const HomePage = () => {
                       />
                       <span className="ant-rate-text">trở lên</span>
                     </div>
-                    <div>
+                    <div className="rating-row">
                       <Rate
                         value={2}
                         disabled
@@ -418,7 +441,7 @@ const HomePage = () => {
                       />
                       <span className="ant-rate-text">trở lên</span>
                     </div>
-                    <div>
+                    <div className="rating-row">
                       <Rate
                         value={1}
                         disabled
@@ -433,7 +456,7 @@ const HomePage = () => {
                 </Form>
               </div>
             </Col>
-            <Col md={20} xs={24}>
+            <Col md={19} xs={24}>
               <Spin spinning={isLoading} tip="Loading...">
                 <div
                   style={{
@@ -465,7 +488,7 @@ const HomePage = () => {
                     </Col>
                   </Row>
                   <Row className="customize-row">
-                    {listBook?.map((item, index) => {
+                    {listBook?.map((item: IBook, index: number) => {
                       return (
                         <div
                           className="column"
@@ -478,6 +501,11 @@ const HomePage = () => {
                           onClick={() => handleViewDetailBook(item)}
                         >
                           <div className="wrapper">
+                            {item.discount > 0 && (
+                              <span className="discount-badge">
+                                -{item.discount}%
+                              </span>
+                            )}
                             <div className="thumbnail">
                               <img src={item.thumbnail} alt="thumbnail book" />
                             </div>
@@ -485,10 +513,25 @@ const HomePage = () => {
                               {item.title}
                             </div>
                             <div className="price">
-                              {new Intl.NumberFormat("vi-VN", {
-                                style: "currency",
-                                currency: "VND",
-                              }).format(item?.price ?? 0)}
+                              {(() => {
+                                const price = item?.price || 0;
+                                const discount = item?.discount || 0;
+                                const finalPrice = Math.round(
+                                  price * (1 - discount / 100)
+                                );
+                                return (
+                                  <>
+                                    <span className="final-price">
+                                      {formatCurrency(finalPrice)}
+                                    </span>
+                                    {discount > 0 && (
+                                      <span className="old-price">
+                                        {formatCurrency(price)}
+                                      </span>
+                                    )}
+                                  </>
+                                );
+                              })()}
                             </div>
                             <div className="rating">
                               <Rate
@@ -499,7 +542,7 @@ const HomePage = () => {
                                   fontSize: 10,
                                 }}
                               />
-                              <span>Đã bán {item.sold}</span>
+                              <span className="sold">Đã bán {item.sold}</span>
                             </div>
                           </div>
                         </div>
