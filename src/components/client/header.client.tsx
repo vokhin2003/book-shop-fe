@@ -1,30 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { FaReact } from "react-icons/fa";
 import { FiShoppingCart } from "react-icons/fi";
 import { VscSearchFuzzy } from "react-icons/vsc";
-import {
-  Divider,
-  Badge,
-  Drawer,
-  Avatar,
-  Popover,
-  Empty,
-  message,
-  Image,
-} from "antd";
+import { Divider, Badge, Drawer, Avatar, Popover, Empty, message } from "antd";
 import { Dropdown, Space } from "antd";
 import { useNavigate } from "react-router";
 import "styles/app.header.scss";
 import { isMobile } from "react-device-detect";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { Link, useLocation } from "react-router-dom";
-import { logoutAPI } from "@/services/api";
+import { fetchBookAPI, logoutAPI } from "@/services/api";
 import { setLogoutAction } from "@/redux/slice/accountSlice";
 import { convertSlug } from "@/utils";
 import { clearCartAction } from "@/redux/slice/cartSlice";
 import ManageAccount from "./account";
 import { removeToken } from "@/notifications/firebase";
 import { UserOutlined } from "@ant-design/icons";
+import type { IBook } from "@/types/backend";
+import debounce from "lodash/debounce";
 
 interface IProps {
   searchTerm: string;
@@ -36,8 +29,7 @@ interface IProps {
 }
 
 const Header = (props: IProps) => {
-  const { searchTerm, setSearchTerm, filter, setFilter, current, setCurrent } =
-    props;
+  const { searchTerm, setSearchTerm, filter, setFilter, setCurrent } = props;
 
   // const { carts, setCarts } = useCurrentApp();
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -60,6 +52,55 @@ const Header = (props: IProps) => {
   const user = useAppSelector((state) => state.account.user);
 
   const carts = useAppSelector((state) => state.cart.items);
+
+  // search suggestions state
+  const [suggestions, setSuggestions] = useState<IBook[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] =
+    useState<boolean>(false);
+  // removed old timer ref in favor of lodash.debounce
+
+  const sanitizeSearchQuery = (value: string): string => {
+    return value
+      ? value
+          .trim()
+          .replace(
+            /[^a-zA-Z0-9\s-.,:áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđĐ]/g,
+            ""
+          )
+          .replace(/\s+/g, " ")
+          .trim()
+      : "";
+  };
+
+  const debouncedFetchSuggestions = useMemo(
+    () =>
+      debounce(async (term: string) => {
+        try {
+          const res = await fetchBookAPI(
+            `page=1&size=6&sort=sold,desc&filter=(title~~'${term}')`
+          );
+          const result: IBook[] = res?.data?.result ?? [];
+          setSuggestions(result);
+          setShowSuggestions(true);
+        } finally {
+          setIsLoadingSuggestions(false);
+        }
+      }, 300),
+    []
+  );
+
+  // debounce suggestions when typing
+  useEffect(() => {
+    const term = sanitizeSearchQuery(searchTerm || "");
+    if (!term) {
+      setSuggestions([]);
+      return;
+    }
+    setIsLoadingSuggestions(true);
+    debouncedFetchSuggestions(term);
+    return () => debouncedFetchSuggestions.cancel();
+  }, [searchTerm, debouncedFetchSuggestions]);
 
   const handleLogout = async () => {
     // Lấy userId và deviceToken trước khi xóa
@@ -197,7 +238,7 @@ const Header = (props: IProps) => {
     const displayCarts = carts?.slice(0, 4) || [];
     const hasMoreItems = carts?.length > 4;
 
-    const handleItemClick = (book: any) => {
+    const handleItemClick = (book: IBook) => {
       const slug = convertSlug(book.title);
       navigate(`/book/${slug}?id=${book.id}`);
     };
@@ -274,23 +315,79 @@ const Header = (props: IProps) => {
                   <FaReact className="rotate icon-react" />
                   Rober
                 </span>
-
-                <VscSearchFuzzy className="icon-search" />
               </span>
-              <input
-                className="input-search"
-                type={"text"}
-                placeholder="Bạn tìm gì hôm nay"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    // Call your function here
-                    handleSearch();
-                    console.log(">>> enter:");
+              <div className="search-box">
+                <VscSearchFuzzy
+                  className="icon-search"
+                  onClick={() => handleSearch()}
+                />
+                <input
+                  className="input-search"
+                  type={"text"}
+                  placeholder="Bạn tìm gì hôm nay"
+                  value={searchTerm}
+                  onFocus={() => setShowSuggestions(true)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
+                  onBlur={() =>
+                    setTimeout(() => setShowSuggestions(false), 150)
                   }
-                }}
-              />
+                />
+                {showSuggestions &&
+                  (suggestions.length > 0 || isLoadingSuggestions) && (
+                    <div
+                      className="search-suggestions"
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
+                      {isLoadingSuggestions ? (
+                        <div className="suggestion-loading">Đang tìm kiếm…</div>
+                      ) : (
+                        suggestions.slice(0, 4).map((book: IBook) => {
+                          const handleClick = () => {
+                            const slug = convertSlug(book.title);
+                            navigate(`/book/${slug}?id=${book.id}`);
+                            setShowSuggestions(false);
+                          };
+                          return (
+                            <div
+                              key={book.id}
+                              className="suggestion-item"
+                              onClick={handleClick}
+                            >
+                              <div className="thumb">
+                                <img src={book.thumbnail} alt={book.title} />
+                              </div>
+                              <div className="meta">
+                                <div className="title" title={book.title}>
+                                  {book.title}
+                                </div>
+                                <div className="price">
+                                  {new Intl.NumberFormat("vi-VN", {
+                                    style: "currency",
+                                    currency: "VND",
+                                  }).format(book.price ?? 0)}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                      {suggestions.length > 4 && (
+                        <div
+                          className="suggestion-footer"
+                          onClick={() => handleSearch()}
+                        >
+                          Xem tất cả kết quả cho “
+                          {sanitizeSearchQuery(searchTerm)}”
+                        </div>
+                      )}
+                    </div>
+                  )}
+              </div>
             </div>
           </div>
           <nav className="page-header__bottom">
@@ -318,13 +415,11 @@ const Header = (props: IProps) => {
                     </Popover>
                   </>
                 ) : (
-                  <Badge
-                    count={carts?.length ?? 0}
-                    size="small"
-                    showZero
-                    onClick={() => navigate("/order")}
-                  >
-                    <FiShoppingCart className="icon-cart" />
+                  <Badge count={carts?.length ?? 0} size="small" showZero>
+                    <FiShoppingCart
+                      className="icon-cart"
+                      onClick={() => navigate("/order")}
+                    />
                   </Badge>
                 )}
               </li>
