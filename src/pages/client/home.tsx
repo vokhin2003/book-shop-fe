@@ -69,12 +69,12 @@ const HomePage = () => {
       children: <></>,
     },
     {
-      key: "&sort=price,asc",
+      key: "&sort=actualPrice,asc",
       label: "Giá Thấp Đến Cao",
       children: <></>,
     },
     {
-      key: "&sort=price,desc",
+      key: "&sort=actualPrice,desc",
       label: "Giá Cao Đến thấp",
       children: <></>,
     },
@@ -187,14 +187,14 @@ const HomePage = () => {
     const fromVal = values.range?.from;
     const toVal = values.range?.to;
     if (typeof fromVal === "number" && fromVal > 0) {
-      priceQuery += `price>:${fromVal}`;
+      priceQuery += `actualPrice>:${fromVal}`;
     }
 
     if (typeof toVal === "number" && toVal > 0) {
       if (priceQuery) {
-        priceQuery += ` and price<:${toVal}`;
+        priceQuery += ` and actualPrice<:${toVal}`;
       } else {
-        priceQuery += `price<:${toVal}`;
+        priceQuery += `actualPrice<:${toVal}`;
       }
     }
 
@@ -235,16 +235,16 @@ const HomePage = () => {
 
     if (values.range.from && values.range.from > 0) {
       // query += `price>=${values.range.from}`;
-      query += `price>:${values.range.from}`;
+      query += `actualPrice>:${values.range.from}`;
     }
 
     if (values.range.to && values.range.to > 0) {
       if (query) {
         // query += `&price<=${values.range.to}`;
-        query += ` and price<:${values.range.to}`;
+        query += ` and actualPrice<:${values.range.to}`;
       } else {
         // query += `price<=${values.range.to}`;
-        query += `price<:${values.range.to}`;
+        query += `actualPrice<:${values.range.to}`;
       }
     }
 
