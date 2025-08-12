@@ -270,21 +270,28 @@ export const fetchRoleAPI = (query: string) => {
 Module Category
  */
 
-export const createCategoryAPI = (name: string, description?: string) => {
+export const createCategoryAPI = (
+  name: string,
+  thumbnail?: string,
+  description?: string
+) => {
   return axios.post<IBackendRes<ICategory>>("/api/v1/categories", {
     name,
     description,
+    thumbnail,
   });
 };
 
 export const updateCategoryAPI = (
   id: number,
   name: string,
+  thumbnail?: string,
   description?: string
 ) => {
   return axios.put<IBackendRes<ICategory>>(`/api/v1/categories/${id}`, {
     name,
     description,
+    thumbnail,
   });
 };
 

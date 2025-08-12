@@ -42,7 +42,7 @@ export interface IAccount {
   };
 }
 
-export interface IGetAccount extends Omit<IAccount, "access_token"> { }
+export interface IGetAccount extends Omit<IAccount, "access_token"> {}
 
 export interface IUser {
   id: number;
@@ -89,6 +89,7 @@ export interface ICategory {
   description: string | null;
   createdAt?: string;
   updatedAt?: string;
+  thumbnail: string;
 }
 
 export interface IBook {
