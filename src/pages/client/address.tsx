@@ -85,6 +85,18 @@ const AddressPage = () => {
         title: "Họ và tên",
         dataIndex: "fullName",
         width: 220,
+        // render: (_, r) => (
+        //     <span
+        //         style={{ display: "inline-flex", alignItems: "center" }}
+        //     >
+        //         <span>{r.fullName}</span>
+        //         {r.is_default && (
+        //             <Tag color="red" style={{ marginLeft: 8 }}>
+        //                 Mặc định
+        //             </Tag>
+        //         )}
+        //     </span>
+        // ),
       },
       {
         title: "Số điện thoại",
@@ -111,11 +123,6 @@ const AddressPage = () => {
           ),
       },
       {
-        title: "Mặc định",
-        render: (_, r) =>
-          r.is_default ? <Tag color="red">Mặc định</Tag> : null,
-      },
-      {
         title: "Thao tác",
         key: "action",
         render: (_, r) => (
@@ -138,6 +145,7 @@ const AddressPage = () => {
                 </Button>
               </Popconfirm>
             )}
+            {r.is_default && <Tag color="red">Mặc định</Tag>}
           </Space>
         ),
       },

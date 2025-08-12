@@ -10,6 +10,7 @@ import {
   ProFormSelect,
   ProFormText,
   ProTable,
+  ProColumns,
 } from "@ant-design/pro-components";
 import {
   Breadcrumb,
@@ -27,7 +28,7 @@ import {
   message,
   notification,
 } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import enUS from "antd/lib/locale/en_US";
@@ -39,7 +40,7 @@ import {
   updateOrderAPI,
 } from "@/services/api";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 interface IUserSelect {
@@ -87,7 +88,39 @@ const ViewUpsertOrder = () => {
   const [dataUpdate, setDataUpdate] = useState<IOrder | null>(null);
   const [form] = Form.useForm();
 
+  // Province/Ward data for address selection
+  const [provinces, setProvinces] = useState<
+    { idProvince: string; name: string }[]
+  >([]);
+  const [communes, setCommunes] = useState<
+    { idProvince: string; idCommune: string; name: string }[]
+  >([]);
+  const [selectedProvinceId, setSelectedProvinceId] = useState<string | null>(
+    null
+  );
+
+  const wardOptions = useMemo(() => {
+    if (!selectedProvinceId) return [] as { label: string; value: string }[];
+    return communes
+      .filter((c) => c.idProvince === selectedProvinceId)
+      .map((c) => ({ label: c.name, value: c.name }));
+  }, [selectedProvinceId, communes]);
+
   useEffect(() => {
+    // Load province/commune data from public
+    const loadLocation = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.BASE_URL}data/province.json`
+        );
+        const json = await res.json();
+        setProvinces(json.province || []);
+        setCommunes(json.commune || []);
+      } catch {
+        // no-op
+      }
+    };
+
     // Fetch users for dropdown
     const fetchUsers = async () => {
       try {
@@ -127,6 +160,7 @@ const ViewUpsertOrder = () => {
       }
     };
 
+    loadLocation();
     fetchUsers();
     if (!isUpdate) {
       fetchBooks();
@@ -149,10 +183,10 @@ const ViewUpsertOrder = () => {
                 book: item.book,
               }))
             );
+            // Set basic fields first; address fields will be parsed below when provinces are ready
             form.setFieldsValue({
               fullName: res.data.fullName,
               phone: res.data.phone,
-              shippingAddress: res.data.shippingAddress,
               status: res.data.status,
               userId: res.data.userId,
             });
@@ -164,6 +198,44 @@ const ViewUpsertOrder = () => {
     };
     init();
   }, [id, form]);
+
+  // Parse shippingAddress string to addressDetail/ward/province once dataUpdate and provinces are loaded
+  useEffect(() => {
+    if (!dataUpdate?.shippingAddress || provinces.length === 0) return;
+
+    const parseShippingAddress = (input: string) => {
+      const parts = input
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean);
+      let addressDetail = "";
+      let ward = "";
+      let province = "";
+      if (parts.length >= 3) {
+        province = parts[parts.length - 1];
+        ward = parts[parts.length - 2];
+        addressDetail = parts.slice(0, parts.length - 2).join(", ");
+      } else if (parts.length === 2) {
+        [addressDetail, province] = parts;
+      } else if (parts.length === 1) {
+        addressDetail = parts[0];
+      }
+      return { addressDetail, ward, province };
+    };
+
+    const parsed = parseShippingAddress(dataUpdate.shippingAddress);
+    const foundProvince = provinces.find((p) =>
+      parsed.province?.includes(p.name)
+    );
+    const provinceId = foundProvince?.idProvince || null;
+    setSelectedProvinceId(provinceId);
+
+    form.setFieldsValue({
+      addressDetail: parsed.addressDetail || undefined,
+      ward: parsed.ward || undefined,
+      province: foundProvince?.name || parsed.province || undefined,
+    });
+  }, [dataUpdate, provinces, form]);
 
   const handleAddItem = () => {
     if (!selectedBook || itemQuantity <= 0) {
@@ -237,13 +309,26 @@ const ViewUpsertOrder = () => {
     return { subtotal, delivery, total };
   };
 
-  const onFinish = async (values: any) => {
+  interface FormValues {
+    userId?: number;
+    fullName: string;
+    phone: string;
+    addressDetail: string;
+    province: string;
+    ward: string;
+    status?: EOrderStatus;
+  }
+
+  const onFinish = async (values: FormValues) => {
     if (!isUpdate && orderItems.length === 0) {
       message.error("Vui lòng thêm ít nhất một sản phẩm vào đơn hàng");
       return;
     }
 
-    const { fullName, phone, shippingAddress, userId } = values;
+    const { fullName, phone, userId, addressDetail, province, ward } = values;
+    const shippingAddress = [addressDetail, ward, province]
+      .filter((x) => !!x)
+      .join(", ");
 
     // const { total } = calculateTotals();
     // const orderData = {
@@ -262,7 +347,7 @@ const ViewUpsertOrder = () => {
         fullName,
         phone,
         shippingAddress,
-        status: values.status,
+        status: values.status as EOrderStatus,
       };
       // Update order - only allow updating recipient info and status
       const res = await updateOrderAPI(dataUpdate.id, updateOrderData);
@@ -307,42 +392,42 @@ const ViewUpsertOrder = () => {
 
   const { subtotal, delivery, total } = calculateTotals();
 
-  const orderItemColumns = [
+  const orderItemColumns: ProColumns<IOrderItemForm>[] = [
     {
       title: "Sản phẩm",
       dataIndex: "book",
       key: "book",
-      render: (book: IBook) => book.title,
+      render: (_, record) => record.book.title,
     },
     {
       title: "Đơn giá",
       dataIndex: "price",
       key: "price",
-      // render: (price: number) => `$${price.toFixed(2)}`,
-      render: (price: number) => `${Number(price).toLocaleString("vi-VN")} đ`,
+      render: (_, record) =>
+        `${Number(record.price).toLocaleString("vi-VN")} đ`,
     },
     {
       title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
-      render: (quantity: number, record: IOrderItemForm, index: number) =>
+      render: (_, record, index) =>
         isUpdate ? (
-          <Text>{quantity}</Text>
+          <Text>{record.quantity}</Text>
         ) : (
           <InputNumber
             min={1}
             max={101}
-            value={quantity}
-            onChange={(value) => handleQuantityChange(index, value || 1)}
+            value={record.quantity}
+            onChange={(value) =>
+              handleQuantityChange(index as number, value || 1)
+            }
           />
         ),
     },
     {
       title: "Thành tiền",
       key: "total",
-      // render: (record: IOrderItemForm) =>
-      //     `$${(record.price * record.quantity).toFixed(2)}`,
-      render: (record: IOrderItemForm) =>
+      render: (_, record) =>
         `${Number(record.price * record.quantity).toLocaleString("vi-VN")} đ`,
     },
     ...(isUpdate
@@ -351,7 +436,7 @@ const ViewUpsertOrder = () => {
           {
             title: "Thao tác",
             key: "action",
-            render: (_: any, record: IOrderItemForm, index: number) => (
+            render: (_: unknown, __: IOrderItemForm, index: number) => (
               <Button
                 type="text"
                 danger
@@ -359,7 +444,7 @@ const ViewUpsertOrder = () => {
                 onClick={() => handleRemoveItem(index)}
               />
             ),
-          },
+          } as ProColumns<IOrderItemForm>,
         ]),
   ];
 
@@ -389,7 +474,9 @@ const ViewUpsertOrder = () => {
               submitText: isUpdate ? "Cập nhật đơn hàng" : "Tạo đơn hàng",
             },
             onReset: () => navigate("/admin/order"),
-            render: (_: any, dom: any) => <FooterToolbar>{dom}</FooterToolbar>,
+            render: (_: unknown, dom: ReactNode[]) => (
+              <FooterToolbar>{dom}</FooterToolbar>
+            ),
             submitButtonProps: {
               icon: <CheckSquareOutlined />,
             },
@@ -436,6 +523,14 @@ const ViewUpsertOrder = () => {
                       name="userId"
                       fieldProps={{
                         disabled: isUpdate, // Disabled nếu setDataUpdate?.id tồn tại
+                        showSearch: true,
+                        allowClear: true,
+                        optionFilterProp: "label",
+                        filterOption: (input, option) =>
+                          (option?.label ?? "")
+                            .toString()
+                            .toLowerCase()
+                            .includes(input.toLowerCase()),
                       }}
                       options={users}
                       rules={[
@@ -475,16 +570,88 @@ const ViewUpsertOrder = () => {
                     />
                   </Col>
                   <Col span={24}>
+                    <Form.Item
+                      label="Tỉnh/Thành phố, Phường/Xã"
+                      required
+                      style={{ marginBottom: 0 }}
+                    >
+                      <Space.Compact style={{ width: "100%" }}>
+                        <Form.Item
+                          name="province"
+                          rules={[
+                            {
+                              required: true,
+                              message: "Chọn tỉnh/thành phố",
+                            },
+                          ]}
+                          style={{ width: "40%" }}
+                        >
+                          <Select
+                            showSearch
+                            allowClear
+                            placeholder="Tỉnh/Thành phố"
+                            optionFilterProp="label"
+                            options={provinces.map((p) => ({
+                              label: p.name,
+                              value: p.name,
+                              id: p.idProvince,
+                            }))}
+                            onChange={(value) => {
+                              const found = provinces.find(
+                                (p) => p.name === value
+                              );
+                              setSelectedProvinceId(found?.idProvince || null);
+                              form.setFieldValue("ward", undefined);
+                            }}
+                            filterSort={(a, b) =>
+                              (a?.label ?? "")
+                                .toLowerCase()
+                                .localeCompare((b?.label ?? "").toLowerCase())
+                            }
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          name="ward"
+                          rules={[
+                            {
+                              required: true,
+                              message: "Chọn phường/xã",
+                            },
+                          ]}
+                          style={{ width: "60%" }}
+                        >
+                          <Select
+                            showSearch
+                            allowClear
+                            placeholder={
+                              selectedProvinceId
+                                ? "Phường/Xã"
+                                : "Chọn tỉnh/thành phố trước"
+                            }
+                            disabled={!selectedProvinceId}
+                            optionFilterProp="label"
+                            options={wardOptions}
+                            filterSort={(a, b) =>
+                              (a?.label ?? "")
+                                .toLowerCase()
+                                .localeCompare((b?.label ?? "").toLowerCase())
+                            }
+                          />
+                        </Form.Item>
+                      </Space.Compact>
+                    </Form.Item>
+                  </Col>
+                  <Col span={24}>
                     <ProFormText
-                      label="Địa chỉ giao hàng"
-                      name="shippingAddress"
+                      label="Địa chỉ cụ thể"
+                      name="addressDetail"
                       rules={[
                         {
                           required: true,
-                          message: "Vui lòng không bỏ trống",
+                          message: "Nhập địa chỉ cụ thể",
                         },
                       ]}
-                      placeholder="Nhập địa chỉ giao hàng"
+                      placeholder="Số nhà, tên đường..."
                     />
                   </Col>
                   {isUpdate && (
