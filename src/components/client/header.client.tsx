@@ -155,6 +155,8 @@ const Header = (props: IProps) => {
       // Nếu không có điều kiện tìm kiếm, giữ nguyên filter
       // Nếu đang ở landing thì đưa về shop để hiển thị danh sách trống
       if (location.pathname !== "/shop") navigate("/shop");
+      // blur suggestions by hiding dropdown and clearing focus
+      setShowSuggestions(false);
       return;
     }
 
@@ -166,6 +168,7 @@ const Header = (props: IProps) => {
       setFilter(`(title~~'${cleanSearchQuery}')`);
       setCurrent(1);
       if (location.pathname !== "/shop") navigate("/shop");
+      setShowSuggestions(false);
       return;
     }
 
@@ -191,6 +194,7 @@ const Header = (props: IProps) => {
     setFilter(`${baseFilterQuery} and (title~~'${cleanSearchQuery}')`);
     setCurrent(1);
     if (location.pathname !== "/shop") navigate("/shop");
+    setShowSuggestions(false);
   };
 
   const items = [
@@ -379,7 +383,15 @@ const Header = (props: IProps) => {
                       {suggestions.length > 4 && (
                         <div
                           className="suggestion-footer"
-                          onClick={() => handleSearch()}
+                          onClick={() => {
+                            handleSearch();
+                            // ensure input loses focus to close popup immediately
+                            const input =
+                              document.querySelector<HTMLInputElement>(
+                                ".page-header .input-search"
+                              );
+                            input?.blur();
+                          }}
                         >
                           Xem tất cả kết quả cho “
                           {sanitizeSearchQuery(searchTerm)}”
